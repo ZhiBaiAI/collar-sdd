@@ -13,15 +13,17 @@
 ```
 docs/specs/
 ├── README.md                       # 本文件：站点地图 + 规则
-├── _templates/                     # 模板（feature / patch / sunset / proposal）
+├── _templates/                     # 模板（feature / patch / sunset / proposal / tests）
 ├── _archived/                      # 日落归档区（只进不改，禁止删除）
 ├── 00_[业务地图]示例域/             # 【示范】feature + patch 的最小样例
 │   └── 01_示例功能/
 │       ├── spec.md                 # feature 主文档
+│       ├── tests.md                # 测试文档（spec 的伴生文件）
 │       └── PATCH-001-分页策略.md    # patch（双向指针示范）
 ├── 01_[业务地图]示范域/             # 【示范】四种类型并存的完整主线案例
 │   └── 01_核心循环/
 │       ├── spec.md                 # V2 正式版（含变更全景表）
+│       ├── tests.md                # 测试文档（含随 patch/sunset 演化的示范）
 │       ├── PATCH-001-超时重试.md    # V2 的补丁
 │       └── SUNSET-001-V1自建方案.md # V1 日落剧本
 └── NN_[业务地图]XX域/               # ← 你的真实业务域从 NN=⟨02⟩ 起
@@ -56,6 +58,21 @@ docs/specs/
 3. **生命周期明确** —— 大前期设计走蓝图，功能下线走日落，稳定功能走 feature + patch。
 
 一个完整生命周期：`blueprint(预研)` → `feature(正式)` → `patch(迭代)` → `sunset(日落归档)`。
+
+### 伴生文档 `tests.md`：不是第五种变更类型
+
+每个功能点目录下可以有且只有一份 `tests.md`，它是 `spec.md` 的**伴生文档**：
+
+- **它不参与上面的类型划分** —— 变更类型永远只有 feature / patch / sunset / blueprint 四种。
+  `tests.md` 是「依附于某个功能点的测试知识」，不表达需求演进，**不要给它编号**（不叫 `TEST-001`）。
+- **它靠验收标准编号与 spec 连接** —— spec §5 的每条验收标准编号为 `AC-N`
+  （patch §⑥ 用 `AC-P⟨NNN⟩-N`），`tests.md` 的每个测试点必须回指某条 AC。
+  于是「验收标准可测试」从口号变成**可机械核对**的事实：有 AC 却无测试点即视为缺口。
+- **它随功能点的生命周期走** —— 新建 feature 时一并建立；patch 改了验收标准就同步追加测试点；
+  功能 sunset 时测试点标作废但**记录保留**（与 sunset「不删除、移归档」的哲学一致）。
+
+模板：[_templates/tests.md](_templates/tests.md)。
+跨功能点的测试知识（分层口径 / 运行时机 / 冒烟清单）**不放这里**，见 [runbook/testing.md](../runbook/testing.md)。
 
 ---
 
@@ -169,6 +186,8 @@ sunset 产出的是一份**带状态机的可执行迁移剧本**：
 
 - [ ] 已确认归属业务域，或已新建域并更新本文件的认领表
 - [ ] 已登记负责人、前台路由、后台 API 领域
-- [ ] 使用 [_templates/feature.md](_templates/feature.md)，验收标准可测试
+- [ ] 使用 [_templates/feature.md](_templates/feature.md)，验收标准**已编号 `AC-N`**且可测试
+- [ ] 已建同目录 [tests.md](_templates/tests.md)，每条 `AC-N` 至少对应一个测试点
+- [ ] 已在 [runbook/testing.md](../runbook/testing.md) 的覆盖索引登记本功能点
 - [ ] 影响面写清：动了哪些模块 / 接口 / 数据 / 配置
 - [ ] 如需预研，先在 wiki/blue-print 里养，别直接写 specs

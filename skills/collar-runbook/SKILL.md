@@ -30,7 +30,12 @@ agent_created: true
 | **强约定** | `docs/runbook/conventions.md` | 全项目必须遵守的规则，违反即拦截 |
 | **环境差异** | `docs/runbook/environments.md` | 预发 / 线上 / 本地的差异，隐藏地形 |
 | **排障剧本** | `docs/runbook/troubleshooting.md` | 现象 → 根因 → 解法 → 复盘 |
-| **通用过程知识** | `docs/runbook/README.md` 下的索引条目 | 不属于以上三类的零散经验 |
+| **测试知识** | `docs/runbook/testing.md` | 测试知识总入口：分层口径 / 运行时机 / 冒烟清单 / 覆盖索引 / 测试坑 |
+| **通用过程知识** | `docs/runbook/README.md` 下的索引条目 | 不属于以上四类的零散经验 |
+
+> `testing.md` 是**跨功能点**测试知识的落点；**单个功能点**的测试点写在
+> 该功能点目录下的 `tests.md`（spec 的伴生文档，由 `collar-specs` 维护）。
+> 判据：**这条知识换一个功能点还成立吗？成立 → testing.md，不成立 → 该功能点的 tests.md。**
 
 条目格式（四段式，缺一不可）：
 
@@ -92,6 +97,7 @@ agent_created: true
 - [ ] 强约定已同步进 AGENTS.md 速查表
 - [ ] AGENTS.md ≤ 120 行
 - [ ] 重复的坑已合并，而不是记两条
+- [ ] 测试相关的知识已判断归属：换功能点仍成立 → `testing.md`；否则 → 该功能点的 `tests.md`
 
 ---
 

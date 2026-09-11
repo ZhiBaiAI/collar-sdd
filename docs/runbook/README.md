@@ -14,6 +14,7 @@
 | [conventions.md](conventions.md) | **强约定** —— 全项目必须遵守，违反即拦截 |
 | [environments.md](environments.md) | **环境差异** —— 预发/线上/本地的隐藏地形 |
 | [troubleshooting.md](troubleshooting.md) | **排障剧本** —— 现象 → 根因 → 解法 |
+| [testing.md](testing.md) | **测试知识总入口** —— 分层口径 / 运行时机 / 冒烟清单 / 覆盖索引 / 测试坑 |
 | [context-stitching.md](context-stitching.md) | **上下文缝补协议** —— AI 时代最重要的工程纪律 |
 | [anchor-registry.md](anchor-registry.md) | **锚点登记册** —— 凡「逻辑离开代码」必须登记一条 |
 | [commit-gate.md](commit-gate.md) | **提交关卡** —— 一次提交触发三个 Skill |
@@ -21,6 +22,10 @@
 | [_template-stitching-skill.md](_template-stitching-skill.md) | **MCP 配套 Skill 模板** —— 何时查/怎么查/查到后用 |
 
 不属于以上各类的零散经验，直接以条目形式追加到本文件的「通用过程知识」。
+
+> **测试知识的两个落点别混**：**单个功能点**的测试点写在
+> `docs/specs/NN_[域]/NN_功能/tests.md`（spec 的伴生文档，`collar-specs` 维护）；
+> **跨功能点**的分层口径、运行时机、冒烟清单、覆盖索引才在 [testing.md](testing.md)。
 
 ---
 

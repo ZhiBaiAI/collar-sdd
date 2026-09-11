@@ -55,6 +55,7 @@
 | 外置逻辑 | 提示词/配置外置到平台时必须保留 `//!` 锚点注释 | [context-stitching.md](docs/runbook/context-stitching.md) |
 | 分支策略 | 集成分支名 ⟨`releases/YYYYMMDD`⟩，个人分支不直接合主干 | [commit-gate.md](docs/runbook/commit-gate.md) |
 | 事实缺口 | 缺事实就显式标记「待确认」并发起提问，禁止用猜测填充继续推进 | [conventions.md](docs/runbook/conventions.md) |
+| 测试文档 | 功能点的测试点写在同目录 `tests.md`，验收标准编号 `AC-N` 与之对齐；跨功能点知识查总入口 | [testing.md](docs/runbook/testing.md) |
 
 完整表见 [关键约定](docs/runbook/conventions.md)。
 
