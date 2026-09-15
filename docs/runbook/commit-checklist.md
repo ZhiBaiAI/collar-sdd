@@ -13,7 +13,7 @@
 ```
 <类型>(<范围>): <一句话说明>
 
-commit-checklist: 1✅ 2✅ 3✅ 4✅ 5✅ 6✅
+commit-checklist: 1✅ 2✅ 3✅ 4✅ 5✅ 6✅ 7✅
 偏离说明: <无 / 见 docs/changelog/…>
 ```
 
@@ -23,27 +23,31 @@ commit-checklist: 1✅ 2✅ 3✅ 4✅ 5✅ 6✅
 
 ## 清单
 
-### ① 质量门禁（工程侧）
+### ① 结构门禁（collar-check，技术拦截）
+
+- [ ] `sh scripts/collar-check.sh` 全绿（骨架完整 / 行数 / tests.md 伴生 / AC 对齐 / ADR 编号 / 双向指针 / changelog 联动 / 会话指代）
+- [ ] 没有把调试代码、`⟨.env⟩`、锁文件改动混进本次提交
+
+### ② 质量门禁（工程侧，落地后启用）
 
 - [ ] `⟨make lint⟩` 通过
 - [ ] `⟨make typecheck⟩` 通过
 - [ ] `⟨make test⟩` 通过
-- [ ] 没有把调试代码、`⟨.env⟩`、锁文件改动混进本次提交
 
-### ② collar-changelog —— 记「做了什么」
+### ③ collar-changelog —— 记「做了什么」
 
 - [ ] 已判断变更类型（`feature` / `patch` / `sunset` / `refactor` / `fix` / `chore`）
 - [ ] 已写入 `docs/changelog/YYYY/YYYY-MM.md`
 - [ ] 作者、影响面、关联 spec 坐标已填
 - [ ] 如有 **BREAKING** 变更，已加粗置顶并写明迁移方式
 
-### ③ collar-runbook —— 抽「学到了什么」
+### ④ collar-runbook —— 抽「学到了什么」
 
 - [ ] 本次是否踩了新坑 / 立了新约定 → 是则已落 `conventions.md` / `troubleshooting.md`
 - [ ] 新约定已同步进 AGENTS.md 关键约定速查表（一句话 + 链接）
 - [ ] 每条都有「结论」，不是纯现象流水账
 
-### ④ collar-specs —— 检「代码是否偏离意图」
+### ⑤ collar-specs —— 检「代码是否偏离意图」
 
 - [ ] 已反查本次改动文件对应的 spec 坐标
 - [ ] 已输出差异清单（语义冲突 / 代码超集 / Spec 超集 / 未认领）
@@ -53,12 +57,14 @@ commit-checklist: 1✅ 2✅ 3✅ 4✅ 5✅ 6✅
       新增 AC 已有测试点，或已登记进 `tests.md` §3「已知缺口」
 - [ ] patch 改了验收标准，已同步 `tests.md` 并在其「变更记录」留痕
 
-### ⑤ 入口地图守卫
+### ⑥ 入口地图守卫
 
-- [ ] `AGENTS.md` ≤ 120 行且未逼近 115 守卫线；逼近则已把详情迁到 `docs/` 并只留摘要 + 链接
-- [ ] 当前状态表已更新（完成度、已具备能力）
+- [ ] `AGENTS.md` ≤ 120 行且未逼近 115 守卫线；逼近则已把细节迁到 `docs/` 并只留摘要 + 链接
+- [ ] 现状类文档（`AGENTS.md`、各 `README.md`、架构视图）只写现在时事实——
+      没有引入历史变迁词或会话指代（如「以前 / 不再 / 新增了检查项」这类写法，
+      检查规则见 `scripts/collar-check.sh` S7 注释；历史叙述只进 changelog / ADR / sunset / `_archived/`）
 
-### ⑥ 上下文缝补检查
+### ⑦ 上下文缝补检查
 
 - [ ] 本次是否把逻辑外置出代码（提示词 / 配置 / 脚本 / 规则）？
   - 否 → 勾选通过
@@ -83,7 +89,7 @@ commit-checklist: 1✅ 2✅ 3✅ 4✅ 5✅ 6✅
 
 ## 想升级为「技术强制」时看这里
 
-当前强制力是 Agent 侧软执行（靠指令 + 留痕 + 审计）。
-若团队规模上来、需要真正拦住，按 [commit-gate.md](commit-gate.md)「装配方式」一节挂 hooks：
-`pre-commit` 放 ①，`post-commit` 放 ②③⑤，`pre-push` 放 ④⑥。
+结构门禁（collar-check）已经是技术拦截。语义检查仍是 Agent 侧软执行（靠指令 + 留痕 + 审计）。
+若团队规模上来、需要把质量门禁也真正拦住，按 [commit-gate.md](commit-gate.md)「装配方式」一节挂 hooks：
+`pre-commit` 放 ①②，`post-commit` 放 ③④，`pre-push` 放 ⑤⑥⑦。
 **关卡的执行体可以换，但契约声明只在 `collar.yaml` 一处。**

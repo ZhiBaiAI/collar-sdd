@@ -42,20 +42,22 @@
 .
 ├── AGENTS.md                 # The single entry map for agents (≤120 lines, navigation only)
 ├── collar.yaml               # Identity / Boundary / Validation — three-layer declaration
+├── scripts/                  # Gate scripts (language-agnostic, work out of the box)
+│   └── collar-check.sh       #   Structural gate: skeleton / line budget / AC alignment / pointers / session deixis, 8 checks
 ├── src/                      # Project source code (all code lives here, tests included)
 │                             #   When adding top-level dirs, update the repo map in AGENTS.md
 │                             #   and allow_write in collar.yaml
 ├── skills/                   # Six collar-* Skills (project assets, AI-tool agnostic)
 │   ├── collar-specs/         #   specs module: source of intent + code-drift detection
 │   ├── collar-changelog/     #   changelog module: what was done
-│   ├── collar-architecture/  #   architecture module: why it's designed this way
+│   ├── collar-architecture/  #   architecture module: current state + why it's designed this way
 │   ├── collar-runbook/       #   runbook module: lessons learned (also guards AGENTS.md)
 │   ├── collar-vendor/        #   vendor module: external reference code assets
 │   └── collar-wiki/          #   wiki module: free-form human knowledge
 └── docs/                     # Six knowledge-base modules (module ↔ Skill ↔ README trinity)
     ├── specs/                #   ① Site map / formal spec layer (feature · patch · sunset)
     ├── changelog/            #   ② Timeline (AI-maintained)
-    ├── architecture/         #   ③ Architecture decision records (AI-drafted, human-approved)
+    ├── architecture/         #   ③ Architecture: structure view + engineering principles + ADR
     ├── runbook/              #   ④ Process knowledge: conventions · env deltas · commit gate · context stitching
     ├── vendor/               #   ⑤ External reference code (human drops in, AI distills)
     └── wiki/                 #   ⑥ Human knowledge base, incl. the blue-print exploration layer
@@ -83,9 +85,12 @@ Most mechanisms work out of the box; a few are pre-seeded blueprints to activate
 
 1. **Knowledge must land in files.** A conclusion that stays in the chat was never concluded.
 2. **The entry map must not bloat.** AGENTS.md only navigates; details move to `docs/`.
-3. **The commit gate must not be bypassed.** One commit = changelog + runbook + spec-drift check, all at once.
+3. **The commit gate must not be bypassed.** One commit = structural gate + changelog + runbook + spec-drift check, all at once.
 4. **Specs are never auto-backfilled.** When code drifts from spec, output a diff report — humans decide.
 5. **If you move logic out of code, stitch the context back.** Any externalization must come with an MCP channel or anchor comments.
+6. **Current-state docs use present tense only.** History belongs to changelog / ADR / sunset / archives (structural gate S7 enforces).
+7. **Central registries hold low-frequency info only.** Ownership may be registered; progress, dates and routes are derivable —
+   never hand-copy what the directory tree and the structural gate already answer (parallel-merge hotspots).
 
 ---
 

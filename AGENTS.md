@@ -25,13 +25,13 @@
 ⟨repo-root⟩/
 ├── collar.yaml          # AI 项圈：Identity / Boundary / Validation 三层声明
 ├── AGENTS.md            # 本文件：入口地图
-├── docs/                # 知识库六模块（详见第 6 节）
+├── docs/                # 知识库六模块（详见第 5 节）
+├── scripts/             # 门禁脚本：collar-check.sh（结构门禁，复制即生效）
 └── src/                 # 源码（全部项目代码放这里）
 ```
 **仓库地图必标三项**（AI 唯一能读懂的地形说明，漏标会让它改错地方）：
 ① 哪个是**唯一开发入口**；② 哪些是**已废弃、禁止改动**；③ 每个子应用的**端口**。
-**多仓聚合工作区**（multi-repo workspace）时，每个子仓一行：路径 + 是什么 + 端口 + ①②标注，
-让 AI 不用翻各仓 README 就能看清全貌。
+大型代码子模块可在其目录内就近放局部规则文件；多仓工作区每个子仓一行：路径 + 是什么 + 端口 + ①②标注。
 约定：`⟨⟩` 表示模板占位符，落地时替换为真实值并删掉尖括号。
 
 ## 3. 快速命令
@@ -39,12 +39,13 @@
 <!-- 占位：语言无关，按你的项目填。AI 不该去翻 README 猜命令。 -->
 | 动作 | 命令 | 说明 |
 |---|---|---|
+| 结构门禁 | `sh scripts/collar-check.sh` | 知识库结构检查，复制即生效，提交前必过 |
 | 安装依赖 | ⟨`make setup`⟩ | |
 | 本地启动 | ⟨`make dev`⟩ | 端口 ⟨:3000⟩ |
 | 构建 | ⟨`make build`⟩ | |
-| 静态检查 | ⟨`make lint`⟩ | 门禁之一 |
-| 类型检查 | ⟨`make typecheck`⟩ | 门禁之一 |
-| 测试 | ⟨`make test`⟩ | 门禁之一 |
+| 静态检查 | ⟨`make lint`⟩ | 质量门禁之一 |
+| 类型检查 | ⟨`make typecheck`⟩ | 质量门禁之一 |
+| 测试 | ⟨`make test`⟩ | 质量门禁之一 |
 
 ## 4. 关键约定速查表
 
@@ -56,27 +57,23 @@
 | 分支策略 | 集成分支名 ⟨`releases/YYYYMMDD`⟩，个人分支不直接合主干 | [commit-gate.md](docs/runbook/commit-gate.md) |
 | 事实缺口 | 缺事实就显式标记「待确认」并发起提问，禁止用猜测填充继续推进 | [conventions.md](docs/runbook/conventions.md) |
 | 测试文档 | 功能点的测试点写在同目录 `tests.md`，验收标准编号 `AC-N` 与之对齐；跨功能点知识查总入口 | [testing.md](docs/runbook/testing.md) |
+| 验收编号 | spec §5 验收标准编号 `AC-N`，`tests.md` 每个测试点必须回指 | [conventions.md](docs/runbook/conventions.md) |
+| 文档时态 | 现状文档只写现在时；历史叙述只进 changelog / ADR / sunset / 归档区 | [conventions.md](docs/runbook/conventions.md) |
 
 完整表见 [关键约定](docs/runbook/conventions.md)。
 
-## 5. 当前状态表
-
-| 模块 | 完成度 | 已具备能力 | Spec |
-|---|---|---|---|
-| ⟨模块 A⟩ | ⟨60%⟩ | ⟨列表 / 详情⟩ | ⟨spec 链接，指向本模块 spec.md⟩ |
-
-## 6. 知识库六模块（去哪找答案）
+## 5. 知识库六模块（去哪找答案）
 
 | 我要找… | 去这里 | 谁维护 | 对应 Skill |
 |---|---|---|---|
 | 功能该怎么做（意图源） | [docs/specs/](docs/specs/README.md) | 人写 + AI 校验 | `collar-specs` |
 | 什么时候改了什么 | [docs/changelog/](docs/changelog/README.md) | AI 自动 | `collar-changelog` |
-| 为什么这么设计 | [docs/architecture/](docs/architecture/README.md) | AI 自动 + 人审 | `collar-architecture` |
+| 系统现在怎样运转 + 为什么这么设计 | [docs/architecture/](docs/architecture/README.md) | AI 自动 + 人审 | `collar-architecture` |
 | 踩过什么坑、有什么约定 | [docs/runbook/](docs/runbook/README.md) | AI 自动 | `collar-runbook` |
 | 外部参考代码怎么用 | [docs/vendor/](docs/vendor/README.md) | 人放 + AI 提炼 | `collar-vendor` |
 | 还没定型的想法 | [docs/wiki/](docs/wiki/README.md) | 人写 | `collar-wiki` |
 
-## 7. 需求变更走哪条路（四种类型 + 提案通道）
+## 6. 需求变更走哪条路（四种类型 + 提案通道）
 
 | 场景 | 类型 | 落盘位置 | 模板 |
 |---|---|---|---|
@@ -88,16 +85,17 @@
 
 规则与成熟度阶梯见 [specs 站点地图](docs/specs/README.md)。
 
-## 8. 提交关卡（git commit = 统一触发点）— **强制执行**
+## 7. 提交关卡（git commit = 统一触发点）— **强制执行**
 
-**Agent 每次 git commit 前必须依次完成下列 6 步，缺一项不得提交：**
+**Agent 每次 git commit 前必须依次完成下列 7 步，缺一项不得提交：**
 
 1. 打开 [commit-checklist.md](docs/runbook/commit-checklist.md) 逐项勾选
-2. `collar-changelog` → 记**做了什么**（时间线）
-3. `collar-runbook` → 抽**学到了什么**（过程知识）
-4. `collar-specs` → 检**代码是否偏离意图**（**只报不改**，交人决策）
-5. 确认本文件 ≤ 115 行（超出先迁出详情再提交）
-6. 确认本次没有「外置逻辑却未缝补」
+2. `sh scripts/collar-check.sh` → 结构门禁全绿（技术拦截，缺一项直接失败）
+3. `collar-changelog` → 记**做了什么**（时间线）
+4. `collar-runbook` → 抽**学到了什么**（过程知识）
+5. `collar-specs` → 检**代码是否偏离意图**（**只报不改**，交人决策）
+6. 确认本文件 ≤ 115 行（超出先迁出详情再提交）
+7. 确认本次没有「外置逻辑却未缝补」
 
 **禁止**：以「改动很小 / 赶时间」为由跳过；用 `--no-verify` **静默**绕过。
 **允许绕过**：仅 `WIP` 与纯 typo 修正，且必须在 commit message 写明原因，月度回顾会列出。
@@ -106,7 +104,7 @@
 
 详见 [commit-gate.md](docs/runbook/commit-gate.md)。
 
-## 9. AI 的行为边界
+## 8. AI 的行为边界
 
 由 [collar.yaml](collar.yaml) 声明：Identity 管知道什么、Boundary 管能改什么、Validation 管改得对不对。**Boundary 默认拒绝（deny-by-default）**。
 

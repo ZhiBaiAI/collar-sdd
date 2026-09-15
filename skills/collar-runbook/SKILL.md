@@ -15,7 +15,7 @@ agent_created: true
 
 | 类型 | 时机 |
 |---|---|
-| 被动 | git commit —— 从本轮对话与改动中抽取约定与坑（提交关卡三件事之一） |
+| 被动 | git commit —— 从提交与对话记录中抽取约定与坑（提交关卡三件事之一） |
 | 主动 | 用户说「记住这个」「以后都这样」「这是个坑」 |
 | 守卫 | 每次写入 `AGENTS.md` 前后，检查行数 |
 
@@ -30,7 +30,7 @@ agent_created: true
 | **强约定** | `docs/runbook/conventions.md` | 全项目必须遵守的规则，违反即拦截 |
 | **环境差异** | `docs/runbook/environments.md` | 预发 / 线上 / 本地的差异，隐藏地形 |
 | **排障剧本** | `docs/runbook/troubleshooting.md` | 现象 → 根因 → 解法 → 复盘 |
-| **测试知识** | `docs/runbook/testing.md` | 测试知识总入口：分层口径 / 运行时机 / 冒烟清单 / 覆盖索引 / 测试坑 |
+| **测试知识** | `docs/runbook/testing.md` | 测试知识总入口：分层口径 / 运行时机 / 冒烟清单 / 测试坑 |
 | **通用过程知识** | `docs/runbook/README.md` 下的索引条目 | 不属于以上四类的零散经验 |
 
 > `testing.md` 是**跨功能点**测试知识的落点；**单个功能点**的测试点写在

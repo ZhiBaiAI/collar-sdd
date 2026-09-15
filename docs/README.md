@@ -13,7 +13,7 @@
 |---|---|---|---|---|
 | ① | [specs/](specs/README.md) | **要做什么**（意图源） | 人写 + AI 校验 | `collar-specs` |
 | ② | [changelog/](changelog/README.md) | **做了什么**（时间线） | AI 自动（commit 触发） | `collar-changelog` |
-| ③ | [architecture/](architecture/README.md) | **为什么这么设计** | AI 自动 + 人审 | `collar-architecture` |
+| ③ | [architecture/](architecture/README.md) | **现在怎样运转 + 为什么这么设计** | AI 自动 + 人审 | `collar-architecture` |
 | ④ | [runbook/](runbook/README.md) | **学到了什么**（过程知识） | AI 自动（commit 触发） | `collar-runbook` |
 | ⑤ | [vendor/](vendor/README.md) | **外部代码怎么用** | 人放 + AI 提炼 | `collar-vendor` |
 | ⑥ | [wiki/](wiki/README.md) | **还没定型的想法** | 人写 | `collar-wiki` |
@@ -23,7 +23,7 @@
 | 方向 | 面向未来（意图） | 面向过去（事实） |
 |---|---|---|
 | 做什么 | specs（要做什么） | changelog（做了什么） |
-| 怎么做 | architecture（为什么这么设计） | runbook（踩过什么坑） |
+| 怎么做 | architecture（现在怎样 + 为什么这么设计） | runbook（踩过什么坑） |
 | 从哪来 | wiki（外部世界与想法） | vendor（外部代码资产） |
 
 ## 自动化梯度

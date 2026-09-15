@@ -43,19 +43,21 @@
 .
 ├── AGENTS.md                 # Agent 唯一入口地图（≤120 行，只导航）
 ├── collar.yaml               # Identity / Boundary / Validation 三层声明
+├── scripts/                  # 门禁脚本（语言无关，复制即生效）
+│   └── collar-check.sh       #   结构门禁：骨架 / 行数 / AC 对齐 / 双向指针 / 会话指代等 8 项
 ├── src/                      # 项目源码（全部代码放这里，含测试）
 │                             #   新增顶层目录时需同步 AGENTS.md 仓库地图与 collar.yaml 的 allow_write
 ├── skills/                   # 六个 collar-* Skill（项目自带，与 AI 工具无关）
 │   ├── collar-specs/         #   specs 模块：意图源 + 代码偏离检测
 │   ├── collar-changelog/     #   changelog 模块：做了什么
-│   ├── collar-architecture/  #   architecture 模块：为什么这么设计
+│   ├── collar-architecture/  #   architecture 模块：现在怎样运转 + 为什么这么设计
 │   ├── collar-runbook/       #   runbook 模块：踩了什么坑（兼守卫 AGENTS.md）
 │   ├── collar-vendor/        #   vendor 模块：外部参考代码资产
 │   └── collar-wiki/          #   wiki 模块：人工自由知识库
 └── docs/                     # 知识库六模块（模块 ↔ Skill ↔ README 三位一体）
     ├── specs/                #   ① 站点地图 / 正式规格层（feature·patch·sunset）
     ├── changelog/            #   ② 时间线（AI 自动）
-    ├── architecture/         #   ③ 架构决策 ADR（AI 自动 + 人审）
+    ├── architecture/         #   ③ 架构：结构视图 + 工程原则 + ADR
     ├── runbook/              #   ④ 过程知识：约定·环境差异·提交关卡·上下文缝补
     ├── vendor/               #   ⑤ 外部参考代码（人放 + AI 提炼）
     └── wiki/                 #   ⑥ 人工知识库，含 blue-print 蓝图探索层
@@ -83,9 +85,12 @@
 
 1. **知识必须落盘**。会话里说清楚的结论不写进 `docs/`，等于没说。
 2. **入口地图不许膨胀**。AGENTS.md 只导航，细节一律迁到 `docs/`。
-3. **提交关卡不许绕过**。一次提交 = changelog + runbook + spec 差异三件事同时发生。
+3. **提交关卡不许绕过**。一次提交 = 结构门禁 + changelog + runbook + spec 差异四件事同时发生。
 4. **Spec 不自动反向更新**。代码偏离 Spec 时输出差异清单，决策权在人。
 5. **外置即缝补**。任何把逻辑挪出代码的优化，必须同步补上 MCP 通道或锚点注释。
+6. **现状文档只写现在时**。历史叙述只进 changelog / ADR / sunset / 归档区（结构门禁 S7 拦截）。
+7. **中心登记表只放低频信息**。责任认领可登记，进度/日期/路由等可推导信息不手抄——
+   能由目录结构与结构门禁回答的，不建第二份副本（避免并行冲突热点）。
 
 ---
 

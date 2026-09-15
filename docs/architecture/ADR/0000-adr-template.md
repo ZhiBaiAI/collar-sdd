@@ -2,7 +2,7 @@
 
 | 项 | 值 |
 |---|---|
-| 状态 | ⟨proposed / accepted / deprecated / superseded by NNNN⟩ |
+| 状态 | ⟨proposed / accepted / rejected / deprecated / superseded by NNNN⟩ |
 | 日期 | ⟨YYYY-MM-DD⟩ |
 | 决策者 | ⟨@谁⟩ |
 | 来源 | ⟨评审会 / 复盘 / 事故报告，写明出处⟩ |
@@ -46,3 +46,8 @@
 
 > ADR **只增不改**。要改就写新 ADR，把旧的标为 `superseded by NNNN`——
 > 决策的演进历史本身就是上下文。
+>
+> **`rejected` 是正经状态**：提出后被否决的决策保留否决理由并标注，不删除——
+> 缺了它，下个会话的 Agent 会把同一个被否方案当新方案重新提一遍。
+> 归档标准是「未来决策价值」：还值得记录的保留（不看字数），
+> 理由已失效的归档，见 [architecture/README.md](../README.md) ADR 归档标准一节。

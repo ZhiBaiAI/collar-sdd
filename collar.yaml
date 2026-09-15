@@ -31,6 +31,7 @@ boundary:
   allow_write:
     - "docs/**"                    # 知识库可写（这是知识沉淀的前提）
     - "src/**"                     # 项目源码（测试代码也放 src 内）
+    - "scripts/**"                 # 门禁与工具脚本（含结构门禁 collar-check）
   deny_write:                      # 硬禁区，任何理由都不可改
     - ".git/**"
     - "⟨.env*⟩"
@@ -64,24 +65,37 @@ boundary:
       changes_via: proposal            # 代码改动一律走提案通道，审阅后落库
 
 validation:
-  # 提交前必须全绿的门禁，任一失败即拦截
+  # 门禁分两类，承诺不同：
+  #   structure —— 结构门禁：检查知识库自身的形状，语言无关，复制模板即真实生效，
+  #                执行体是 scripts/collar-check.sh（只依赖 POSIX sh/grep/find/wc）
+  #   quality   —— 质量门禁：检查代码，语言相关，⟨占位⟩ 由项目落地时装配
+  #                （hooks / 包管理器钩子 / CI，装配方式见 commit-gate.md）
   gates:
-    - name: lint
-      cmd: "⟨make lint⟩"
-    - name: typecheck
-      cmd: "⟨make typecheck⟩"
-    - name: test
-      cmd: "⟨make test⟩"
-    - name: agents-map-guard        # 入口地图行数守卫
+    # ---- structure（真实命令，现在就拦截）----
+    - name: collar-check           # 知识库结构完整性（S0–S7 项见脚本头注释）
+      cmd: "sh scripts/collar-check.sh"
+      kind: structure
+      owner: collar-runbook
+    - name: agents-map-guard       # 入口地图行数守卫（已含在 collar-check S1）
       rule: "AGENTS.md ≤ 120 行，逼近 115 行触发迁出提醒"
       owner: collar-runbook
-    - name: spec-diff-report        # 代码 ↔ Spec 差异清单
+    - name: spec-diff-report       # 代码 ↔ Spec 差异清单（语义级，Agent 执行）
       rule: "只输出差异交人决策，禁止自动反向修改 Spec"
       owner: collar-specs
-    - name: knowledge-deposit        # 知识沉淀强制门禁
+    - name: knowledge-deposit      # 知识沉淀强制门禁
       rule: "一次提交 = changelog + runbook 同步落盘，不允许『下次一定』"
       owner: collar-changelog
-    - name: context-stitch-check     # 上下文缝补检查（commit-gate ⑥）
-      rule: "本次提交外置了逻辑（提示词/配置/脚本平台）→ 必须已缝补（MCP 通道 / //! 锚点 / ADR 登记），否则视为架构缺陷"
+    - name: context-stitch-check   # 上下文缝补检查（commit-gate ⑥）
+      rule: "提交时外置了逻辑（提示词/配置/脚本平台）→ 必须已缝补（MCP 通道 / //! 锚点 / ADR 登记），否则视为架构缺陷"
       owner: collar-architecture
+    # ---- quality（⟨占位⟩，落地时按技术栈装配）----
+    - name: lint
+      cmd: "⟨make lint⟩"
+      kind: quality
+    - name: typecheck
+      cmd: "⟨make typecheck⟩"
+      kind: quality
+    - name: test
+      cmd: "⟨make test⟩"
+      kind: quality
   on_gate_failure: block            # block | warn

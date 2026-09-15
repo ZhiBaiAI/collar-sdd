@@ -16,7 +16,7 @@
 |---|---|---|---|---|
 | [collar-specs](collar-specs/SKILL.md) | `docs/specs/` | 要做什么（意图源） | 主动写 + **commit 被动校验** | 半自动（只报不改） |
 | [collar-changelog](collar-changelog/SKILL.md) | `docs/changelog/` | 做了什么 | **commit 强制触发** | 全自动 |
-| [collar-architecture](collar-architecture/SKILL.md) | `docs/architecture/` | 为什么这么设计 | 被动（结构性变动自动触发）+ 主动（技术选型） | 自动提取 + 人审决策 |
+| [collar-architecture](collar-architecture/SKILL.md) | `docs/architecture/` | 现在怎样运转 + 为什么这么设计 | 被动（结构性变动自动触发）+ 主动（技术选型） | 自动提取 + 人审决策 |
 | [collar-runbook](collar-runbook/SKILL.md) | `docs/runbook/` | 学到了什么 | **commit 强制触发** + 主动 | 全自动 + 人确认 |
 | [collar-vendor](collar-vendor/SKILL.md) | `docs/vendor/` | 外部代码怎么用 | 主动 | 人主导 |
 | [collar-wiki](collar-wiki/SKILL.md) | `docs/wiki/` | 还没定型的想法 | 主动 | 人主导 |

@@ -51,3 +51,8 @@ docs/changelog/
 主动触发 `collar-changelog` 时按月聚合输出：
 各业务域改动分布、破坏性变更清单、sunset 清单、Spec 偏离高发区。
 趋势反哺 `collar-architecture`（是否该重构）与 `collar-runbook`（是否该立约定）。
+
+回顾额外回答两个知识库卫生问题（只进也要有出）：
+1. **约定退役**：哪些约定连续两个月没有命中过（没人踩也没人依赖）→ 降级为普通条目或合并
+2. **ADR 归档**：哪些 ADR 的理由已失效（被 supersede / 已成常识）→ 标注 deprecated 或归档
+   （归档标准看「未来决策价值」，见 [architecture/README.md](../architecture/README.md)）
