@@ -83,11 +83,12 @@ printf '%s\n' "$TSV" | awk -v patch="$BASE" '
     else if (t=="ADDED") { addn++; addac[addn]=ac; addtxt[addn]=txt }
     next
   }
-  { sl++; lines[sl]=$0; if ($0 ~ /^- \[.\] .*`AC-/) lastac=sl }
+  { sl++; lines[sl]=$0; if ($0 ~ /^- \[.\] `AC-[0-9]+`/) lastac=sl }
   END {
     for (i=1; i<=sl; i++) {
       l=lines[i]
-      if (l ~ /^- \[.\] .*`AC-/ && match(l,/`AC-[0-9]+`/)) {
+      if (match(l,/^- \[.\] `AC-[0-9]+`/)) {
+        match(l, /`AC-[0-9]+`/)
         ac=substr(l,RSTART+1,RLENGTH-2)
         if (ac in rem) { print "<!-- " ac " 已由 " patch " 作废 -->"; continue }
         if (ac in mod) { sub(/`AC-[0-9]+`.*/, "`" ac "` " mod[ac], l) }
