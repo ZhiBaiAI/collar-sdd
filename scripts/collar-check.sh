@@ -15,7 +15,7 @@ cd "$ROOT"
 
 FAIL=0
 note() { printf '  %s\n' "$1"; }
-fail() { FAIL=1; printf 'FAIL %s\n' "$1"; note "$2"; }
+fail() { FAIL=1; printf 'FAIL %s\n' "$1"; note "修法：$2"; }
 pass() { printf 'ok   %s\n' "$1"; }
 
 echo "collar-check — 结构门禁"
@@ -32,13 +32,13 @@ for REQUIRED in AGENTS.md collar.yaml docs/README.md docs/specs/README.md \
                 docs/architecture/README.md scripts/collar-check.sh; do
   if [ ! -f "$REQUIRED" ]; then
     S0_BROKEN=1
-    fail "S0 核心文件缺失" "${REQUIRED} 不存在 —— 模板骨架被破坏，先恢复该文件再谈其他检查"
+    fail "S0 核心文件缺失" "${REQUIRED} 不存在——恢复该文件（模板原样或从 git 历史找回）"
   fi
 done
 for REQUIRED_DIR in docs/specs docs/runbook docs/architecture docs/changelog; do
   if [ ! -d "$REQUIRED_DIR" ]; then
     S0_BROKEN=1
-    fail "S0 核心目录缺失" "${REQUIRED_DIR}/ 不存在 —— 知识库六模块结构被破坏"
+    fail "S0 核心目录缺失" "${REQUIRED_DIR}/ 不存在——恢复该目录（六模块结构缺一不可）"
   fi
 done
 [ "$S0_BROKEN" -eq 0 ] && pass "S0 模板骨架完整（核心文件与目录齐全）"
@@ -111,7 +111,8 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# S5 patch 双向指针：patch 里有「覆盖范围」节，主文档里有「已被 …取代」标记
+# S5 patch 双向指针 + Delta 一致性：patch 有「覆盖范围」节、主文档有取代标记；
+#    §⑥ delta 校验引用存在性、RENAMED 配对/新号、跨小节冲突、段外孤儿行、标题拼错
 # ---------------------------------------------------------------------------
 S5_BROKEN=0
 # find 输出含空格路径会被 for 按空白分词 → 用 heredoc 逐行读入；
@@ -125,32 +126,88 @@ while IFS= read -r PATCH; do
   # 此时反向指针检查失去依据，报格式错误并跳过本文件的指针检查
   if [ "${NUM}" = "${BASE}" ] || ! printf '%s' "${NUM}" | grep -q '^[0-9]\{3\}$'; then
     S5_BROKEN=1
-    fail "S5 ${PATCH}" "patch 文件名不符合 PATCH-NNN-简述 约定（NNN 为三位数字），无法定位其对应的主文档反向指针"
+    fail "S5 ${PATCH}" "patch 文件名不符合 PATCH-NNN-简述 约定（NNN 为三位数字）——改名为 PATCH-NNN-简述.md 后重查"
     continue
   fi
-  grep -q '覆盖范围' "${PATCH}" || { S5_BROKEN=1; fail "S5 ${PATCH}" "缺少「① 覆盖范围」节（Patch → 主文档指针）"; }
+  grep -q '覆盖范围' "${PATCH}" || { S5_BROKEN=1; fail "S5 ${PATCH}" "缺少「① 覆盖范围」节——按 _templates/patch.md 补上 Patch → 主文档指针"; }
   # 主文档侧：spec.md 应出现 PATCH-<NUM> 的取代标记
   if ! grep -q "已被.*PATCH-${NUM}" "$DIR/spec.md" 2>/dev/null; then
     S5_BROKEN=1
-    fail "S5 ${DIR}/spec.md" "存在 ${BASE} 但主文档没有「已被 …PATCH-${NUM}…取代」反向指针"
+    fail "S5 ${DIR}/spec.md" "存在 ${BASE} 但主文档没有「已被 …PATCH-${NUM}…取代」反向指针——在主文档目标章节加取代标记（见 patch 模板 §⑤）"
   fi
-  # Delta 语义：⑥ 的 MODIFIED/REMOVED 引用的 `AC-N` 必须在主文档真实存在
-  # （只查清单行里的反引号编号，ADDED 用 AC-P 编号不查主文档）
-  for AC in $(awk '
-    /^###[ ]+MODIFIED/ {m=1; next}
-    /^###[ ]+REMOVED/  {m=1; next}
-    /^###/ || /^## /   {m=0}
-    m && match($0, /`AC-[0-9]+`/) { print substr($0, RSTART+1, RLENGTH-2) }
-  ' "${PATCH}" | sort -u); do
-    if ! grep -q "\`${AC}\`" "${DIR}/spec.md" 2>/dev/null; then
-      S5_BROKEN=1
-      fail "S5 ${PATCH}" "delta 引用的 ${AC} 在主文档 §5 不存在——编号打错或该 AC 已被移除"
-    fi
-  done
+  # Delta 一致性（一次 awk 全查，输出 KIND\t数据 由下方循环分发）：
+  #   CHK  需存在于主文档的编号（MODIFIED / REMOVED / RENAMED FROM）
+  #   NEW  不得存在于主文档的编号（RENAMED TO）
+  #   ERR  结构错误：小节内重复 / 跨小节同编号 / FROM-TO 不配对 /
+  #        段外 AC 孤儿行 / 疑似拼错的小节标题
+  while IFS="$(printf '\t')" read -r KIND REST; do
+    [ -n "${KIND}" ] || continue
+    case "${KIND}" in
+      CHK) grep -q "\`${REST}\`" "${DIR}/spec.md" 2>/dev/null || {
+             S5_BROKEN=1
+             fail "S5 ${PATCH}" "delta 引用的 ${REST} 在主文档 §5 不存在——核对编号（可能打错、已被移除或被 RENAMED 改名）"
+           } ;;
+      NEW) grep -q "\`${REST}\`" "${DIR}/spec.md" 2>/dev/null && {
+             S5_BROKEN=1
+             fail "S5 ${PATCH}" "RENAMED TO 的 ${REST} 在主文档已存在——TO 必须换新编号（通常用 AC-PNNN-N）"
+           } ;;
+      ERR) S5_BROKEN=1; fail "S5 ${PATCH}" "${REST}" ;;
+    esac
+  done <<DELTACHECK
+$(awk '
+  /^###[ ]+/ {
+    if (sec=="RENAMED" && pend!="") { printf "ERR\t### RENAMED 里 FROM: `%s` 没有配对的 TO:（每条 FROM: 紧跟一条 TO:）\n", pend; pend="" }
+    hdr=$0; sub(/^###[ ]+/,"",hdr); sub(/[ ]+$/,"",hdr)
+    if (hdr=="ADDED"||hdr=="MODIFIED"||hdr=="REMOVED"||hdr=="RENAMED") { sec=hdr }
+    else {
+      sec=""; up=toupper(hdr)
+      if (up ~ /^ADD|^MODI|^REMO|^RENA/) printf "ERR\t小节标题「### %s」疑似拼错——delta 小节只认 ADDED/MODIFIED/REMOVED/RENAMED（若非笔误请改标题或层级）\n", hdr
+    }
+    next
+  }
+  /^## / {
+    if (sec=="RENAMED" && pend!="") { printf "ERR\t### RENAMED 里 FROM: `%s` 没有配对的 TO:（每条 FROM: 紧跟一条 TO:）\n", pend; pend="" }
+    sec=""; next
+  }
+  sec=="RENAMED" && match($0,/^-[ ]*FROM:[ ]*`AC-[A-Za-z0-9-]+`/) {
+    id=$0; sub(/^[^`]*`/,"",id); sub(/`.*/,"",id)
+    if (pend!="") printf "ERR\t### RENAMED 里 FROM: `%s` 没有配对的 TO:（每条 FROM: 紧跟一条 TO:）\n", pend
+    pend=id; mark(id,"RENAMED(FROM)"); printf "CHK\t%s\n", id; next
+  }
+  sec=="RENAMED" && match($0,/^-[ ]*TO:[ ]*`AC-[A-Za-z0-9-]+`/) {
+    id=$0; sub(/^[^`]*`/,"",id); sub(/`.*/,"",id)
+    if (pend=="") printf "ERR\t### RENAMED 里 TO: `%s` 没有配对的 FROM:\n", id
+    else pend=""
+    mark(id,"RENAMED(TO)"); printf "NEW\t%s\n", id; next
+  }
+  sec!="" && sec!="RENAMED" && match($0,/^-[ ]*(\[[ xX]\][ ]*)?`AC-[A-Za-z0-9-]+`/) {
+    id=$0; sub(/^[^`]*`/,"",id); sub(/`.*/,"",id)
+    mark(id,sec); if (sec!="ADDED") printf "CHK\t%s\n", id
+    next
+  }
+  sec=="" && match($0,/^-[ ]*(\[[ xX]\][ ]*)?`AC-[A-Za-z0-9-]+`/) {
+    printf "ERR\tAC 条目不在 delta 小节内会被收敛忽略：%s（移进对应 ### 小节）\n", $0
+  }
+  sec=="" && match($0,/^-[ ]*(FROM|TO):[ ]*`AC-[A-Za-z0-9-]+`/) {
+    printf "ERR\tFROM:/TO: 行不在 ### RENAMED 小节内会被忽略：%s\n", $0
+  }
+  function mark(ac, s) {
+    if (++cnt[s,ac]>1) printf "ERR\t`%s` 在 %s 小节内重复——同一编号只留一条\n", ac, s
+    if (index(seclist[ac], s)==0) seclist[ac]=(seclist[ac]==""?s:seclist[ac] "|" s)
+  }
+  END {
+    if (pend!="") printf "ERR\t### RENAMED 里 FROM: `%s` 没有配对的 TO:（每条 FROM: 紧跟一条 TO:）\n", pend
+    for (ac in seclist) {
+      n=split(seclist[ac],p,"|")
+      if (n>1) printf "ERR\t编号 `%s` 跨多个 delta 小节出现（%s）——一个 AC 只能属于一种操作\n", ac, seclist[ac]
+    }
+  }
+' "${PATCH}")
+DELTACHECK
 done <<FINDLIST
 $(find docs/specs -name 'PATCH-*.md' -not -path '*/_templates/*' -not -path '*/_archived/*')
 FINDLIST
-[ "$S5_BROKEN" -eq 0 ] && pass "S5 patch 双向指针完整"
+[ "$S5_BROKEN" -eq 0 ] && pass "S5 patch 双向指针 + Delta 一致性"
 
 # ---------------------------------------------------------------------------
 # S6 changelog 联动：改了 docs/specs/**（业务域）则同一次提交必须也改 changelog

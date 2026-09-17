@@ -49,10 +49,11 @@
 
 ## ⑥ 验收标准变更（Delta）
 
-> **三类小节分别对应主文档 §5 的不同操作，收敛时可由 `collar-converge.sh` 机械合并。**
+> **四类小节分别对应主文档 §5 的不同操作，收敛时可由 `collar-converge.sh` 机械合并。**
 > 没有对应类型的小节整节删除，不要留空标题。
-> MODIFIED / REMOVED 引用主文档已有的 `AC-N`；ADDED 用 patch 自带编号 `AC-P⟨NNN⟩-N`
-> （与主文档的 `AC-N` 区分开——同一目录下两套编号不能撞车）。
+> MODIFIED / REMOVED / RENAMED(FROM) 引用主文档已有的 `AC-N`；ADDED 与 RENAMED(TO) 用新编号，
+> patch 自带编号为 `AC-P⟨NNN⟩-N`（与主文档的 `AC-N` 区分开——同一目录下两套编号不能撞车）。
+> **同一个 `AC-N` 不许出现在两个小节里**（改了就别删、删了就别改）——结构门禁 S5 会拦。
 
 ### ADDED
 - [ ] `AC-P⟨NNN⟩-1` ⟨新增的可判定条件⟩
@@ -62,6 +63,10 @@
 
 ### REMOVED
 - `AC-⟨N⟩` ⟨作废原因一句话⟩
+
+### RENAMED
+- FROM: `AC-⟨N⟩` ⟨原编号，必须在主文档 §5 存在⟩
+- TO: `AC-⟨M⟩` ⟨新编号，必须在主文档不存在；通常用 `AC-P⟨NNN⟩-N`⟩
 
 > **同步要求**：patch 一旦新增或改动了验收标准，必须回到同目录 [`tests.md`](./tests.md)
 > 追加/更新对应测试点，并在其「变更记录」留一行——否则 patch 生效了测试还停在旧版本。
@@ -79,5 +84,6 @@
 
 - [ ] 双向指针都已建立（本文件 ① + 主文档 ⑤）
 - [ ] 可独立阅读，不需要先读主文档
-- [ ] delta 小节无空标题；MODIFIED/REMOVED 的 AC 编号在主文档 §5 存在
+- [ ] delta 小节无空标题；MODIFIED/REMOVED/RENAMED(FROM) 的 AC 编号在主文档 §5 存在
+- [ ] 同一 AC 编号不跨 delta 小节重复；RENAMED 的每条 FROM 紧跟一条 TO
 - [ ] 主文档「变更历史」表已追加本 patch 行
