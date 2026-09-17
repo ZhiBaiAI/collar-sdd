@@ -15,7 +15,7 @@
 ## Quick Start (15-minute cold start for a new project)
 
 1. **Copy the skeleton** into your new project root (the template ships without `.git`, so the copy starts clean).
-2. **Remove the demo content** (do this right after copying — checklist below).
+2. **Remove the demo content** (do this right after copying — checklist below; the mechanical parts can be run via `sh scripts/collar-init.sh --yes`).
 3. **Fill in config placeholders**: only replace `⟨⟩` placeholders in the **live docs** — `AGENTS.md` (focus on "What is this project / Repo map / Quick commands"; keep it ≤ 120 lines), `collar.yaml`, this file's title, and defaults in each `docs/*/README.md` and `docs/runbook/*`.
    **Do NOT touch placeholders inside `_templates/`, `_template-*`, or `skills/*/SKILL.md`** — those are template internals, filled only when used.
 4. **Lay out the site map**: create `NN_[Domain]xx/` directories under `docs/specs/` following your business map — see [docs/specs/README.md](docs/specs/README.md).
@@ -42,8 +42,12 @@
 .
 ├── AGENTS.md                 # The single entry map for agents (≤120 lines, navigation only)
 ├── collar.yaml               # Identity / Boundary / Validation — three-layer declaration
-├── scripts/                  # Gate scripts (language-agnostic, work out of the box)
-│   └── collar-check.sh       #   Structural gate: skeleton / line budget / AC alignment / pointers / session deixis, 8 checks
+├── scripts/                  # Gate & operation scripts (language-agnostic, work out of the box)
+│   ├── collar-check.sh       #   Structural gate: skeleton / line budget / AC alignment / pointers+delta / session deixis, 8 checks
+│   ├── collar-new.sh         #   Scaffold a feature / patch / sunset from templates (auto-numbered)
+│   ├── collar-status.sh      #   In-flight navigator: unconverged patches / gaps / overdue items + --specs listing
+│   ├── collar-converge.sh    #   Mechanical patch convergence: merges Delta sections into spec.md
+│   └── collar-init.sh        #   Cold-start executor: cleans demo content + lists placeholders + runs the gate
 ├── src/                      # Project source code (all code lives here, tests included)
 │                             #   When adding top-level dirs, update the repo map in AGENTS.md
 │                             #   and allow_write in collar.yaml

@@ -134,6 +134,19 @@ while IFS= read -r PATCH; do
     S5_BROKEN=1
     fail "S5 ${DIR}/spec.md" "存在 ${BASE} 但主文档没有「已被 …PATCH-${NUM}…取代」反向指针"
   fi
+  # Delta 语义：⑥ 的 MODIFIED/REMOVED 引用的 `AC-N` 必须在主文档真实存在
+  # （只查清单行里的反引号编号，ADDED 用 AC-P 编号不查主文档）
+  for AC in $(awk '
+    /^###[ ]+MODIFIED/ {m=1; next}
+    /^###[ ]+REMOVED/  {m=1; next}
+    /^###/ || /^## /   {m=0}
+    m && match($0, /`AC-[0-9]+`/) { print substr($0, RSTART+1, RLENGTH-2) }
+  ' "${PATCH}" | sort -u); do
+    if ! grep -q "\`${AC}\`" "${DIR}/spec.md" 2>/dev/null; then
+      S5_BROKEN=1
+      fail "S5 ${PATCH}" "delta 引用的 ${AC} 在主文档 §5 不存在——编号打错或该 AC 已被移除"
+    fi
+  done
 done <<FINDLIST
 $(find docs/specs -name 'PATCH-*.md' -not -path '*/_templates/*' -not -path '*/_archived/*')
 FINDLIST
@@ -185,8 +198,10 @@ fi
 echo
 if [ "$FAIL" -eq 0 ]; then
   echo "全部通过 ✓"
+  echo "Next: 按 docs/runbook/commit-checklist.md 完成 ③–⑦（changelog / runbook / spec 差异 / 缝补）后提交"
   exit 0
 else
   echo "存在失败项，提交被拦截 ✗"
+  echo "Next: 按上方逐条修复后重跑 sh scripts/collar-check.sh"
   exit 1
 fi

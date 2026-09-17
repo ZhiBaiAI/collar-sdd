@@ -16,7 +16,7 @@
 ## 快速开始（新项目 15 分钟冷启）
 
 1. **复制骨架**：把本目录拷到新项目根（本模板不带 `.git`，复制即干净）。
-2. **清理示范内容**（复制后立即做，清单见下表）。
+2. **清理示范内容**（复制后立即做，清单见下表；机械部分可直接跑 `sh scripts/collar-init.sh --yes`）。
 3. **填配置占位符**：只替换**活文档**里的 `⟨⟩` —— `AGENTS.md`（重点：项目是什么/仓库地图/快速命令三节，保持 ≤120 行）、`collar.yaml`、本文件标题、各 `docs/*/README.md` 与 `docs/runbook/*` 的默认值。  
    **不要动 `_templates/`、`_template-*` 和 `skills/*/SKILL.md` 里的占位符** —— 那些是模板本体，用到时才填。
 4. **铺站点地图**：在 `docs/specs/` 下按业务地图建 `NN_[业务地图]XX域/`，见 [docs/specs/README.md](docs/specs/README.md)。
@@ -43,8 +43,12 @@
 .
 ├── AGENTS.md                 # Agent 唯一入口地图（≤120 行，只导航）
 ├── collar.yaml               # Identity / Boundary / Validation 三层声明
-├── scripts/                  # 门禁脚本（语言无关，复制即生效）
-│   └── collar-check.sh       #   结构门禁：骨架 / 行数 / AC 对齐 / 双向指针 / 会话指代等 8 项
+├── scripts/                  # 门禁与操作脚本（语言无关，复制即生效）
+│   ├── collar-check.sh       #   结构门禁：骨架 / 行数 / AC 对齐 / 双向指针+delta / 会话指代等 8 项
+│   ├── collar-new.sh         #   从模板建 feature / patch / sunset（自动编号）
+│   ├── collar-status.sh      #   在途导航：未收敛 patch / 缺口 / 超期项 + --specs 清单
+│   ├── collar-converge.sh    #   patch 机械收敛：Delta 三段合并进 spec.md
+│   └── collar-init.sh        #   冷启执行体：清理示范内容 + 扫占位符 + 跑门禁
 ├── src/                      # 项目源码（全部代码放这里，含测试）
 │                             #   新增顶层目录时需同步 AGENTS.md 仓库地图与 collar.yaml 的 allow_write
 ├── skills/                   # 六个 collar-* Skill（项目自带，与 AI 工具无关）

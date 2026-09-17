@@ -40,6 +40,7 @@
 | 动作 | 命令 | 说明 |
 |---|---|---|
 | 结构门禁 | `sh scripts/collar-check.sh` | 知识库结构检查，复制即生效，提交前必过 |
+| 变更操作 | `collar-new.sh` / `collar-status.sh` / `collar-converge.sh`（均在 scripts/） | 建变更 / 在途导航 / patch 机械收敛 |
 | 安装依赖 | ⟨`make setup`⟩ | |
 | 本地启动 | ⟨`make dev`⟩ | 端口 ⟨:3000⟩ |
 | 构建 | ⟨`make build`⟩ | |

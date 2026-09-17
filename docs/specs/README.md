@@ -49,6 +49,10 @@ docs/specs/
 
 > **feature / patch / sunset 活在 specs（正式规格层），blueprint 刻意活在 wiki（自由探索层）。**
 
+**配套脚本**（`scripts/`，复制即生效）：`collar-new.sh` 从模板自动编号建变更、
+`collar-status.sh` 列出在途事项与超期 patch、`collar-converge.sh` 执行 patch 机械收敛、
+`collar-init.sh` 冷启清理示范内容。脚本输出末尾的 `Next:` 行告诉下一步做什么。
+
 ### 为什么这样切分能让人天然分开
 
 1. **目录即认领单元** —— A 认领「创建项目」、B 认领「项目循环」，
@@ -142,6 +146,17 @@ Patch 侧（开头声明覆盖范围）：
 **Patch 自身必须可独立阅读**，不依赖读者先读主文档。
 这对 AI 尤其友好——从任何文件切入都能拼出「当前生效的真相」，不被过期描述误导。
 
+### patch §⑥：验收标准用 Delta 三段（可被机器合并的原因）
+
+patch 对主文档 §5 验收标准的改动必须写成三类小节，而不是自由描述：
+
+- **`### ADDED`** —— 新增的验收标准，用 patch 自带编号 `AC-P⟨NNN⟩-N`
+- **`### MODIFIED`** —— 替代主文档某条 `AC-N` 的新文本（该编号必须在主文档存在）
+- **`### REMOVED`** —— 作废主文档某条 `AC-N`，附原因
+
+三类小节就是 patch → 主文档的机械映射：收敛时 `collar-converge.sh` 据此合文，
+不靠人抄；结构门禁 S5 据此校验编号，不靠人盯。**没有对应类型的小节整节删除，不留空标题。**
+
 ### patch 的收敛（并存是过渡，不是常态）
 
 patch 的存在意义是**让并行不打架**，收敛时机与动作：
@@ -150,9 +165,9 @@ patch 的存在意义是**让并行不打架**，收敛时机与动作：
 |---|---|
 | **并存期以 patch 为准** | 主文档被取代章节仅作历史，**当前生效真相 = patch**（取代标记就是为此而设） |
 | **收敛时机** | patch 合并后稳定 ⟨14⟩ 天无回滚；或同一 feature 下 patch 累积 ≥ ⟨3⟩ 个 |
-| **收敛动作** | ① patch 内容合入主 spec 对应章节，移除「已被取代」标记 ② patch 顶部标注「已收敛 → 并入 spec.md ⟨章节⟩（⟨日期⟩）」，**文件保留作历史** ③ changelog 记一条 |
+| **收敛动作** | ① `sh scripts/collar-converge.sh <PATCH-文件>` 机械合并 §⑥ Delta（MODIFIED 换文 / REMOVED 作废留墓碑 / ADDED 追加）并标 patch「已收敛」② 人/Agent 完成脚本列出的剩余项：正文合入主章节并移除取代标记、tests.md 清理、变更历史补记、changelog 记一条 |
 
-收敛由 feature 负责人触发、`collar-specs` 执行。**收敛不是删除 patch 文件。**
+收敛由 feature 负责人触发、`collar-converge.sh` + `collar-specs` 执行。**收敛不是删除 patch 文件。**
 
 ---
 

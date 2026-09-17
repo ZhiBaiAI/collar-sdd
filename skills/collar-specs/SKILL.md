@@ -45,11 +45,17 @@ agent_created: true
 
 ### Step 3 — 复制模板并填写
 
+优先走脚本（自动编号 + 落对位置）：
+`sh scripts/collar-new.sh <feature|patch|sunset> <域或功能目录> <名称>`；手工时复制对应模板：
+
 - feature → `docs/specs/_templates/feature.md`
 - patch → `docs/specs/_templates/patch.md`
 - sunset → `docs/specs/_templates/sunset.md`
 - blueprint → `docs/wiki/blue-print/_template-blueprint.md`
 - proposal → `docs/specs/_templates/proposal.md`（审阅通过 → 转对应变更类型并登记，驳回 → 保留理由）
+
+写作规则统一以 `collar.yaml` 的 `authoring.rules` 为准（每类产物一节，不再各模板抄一遍）。
+feature §8 / patch §⑦ 的**实施任务**按 `T-N` / `T-PNNN-N` 编号，提交时按覆盖勾选。
 
 > 新建 feature 前，先过模板 §1.1 的**准入四问**（问题-方案匹配 / 范围受控 / 复用优先 / 验收可逆）；
 > 写不准的事实填进 §1.2 待确认表并标注，**禁止用猜测填充**（见 conventions C-004）。
@@ -82,15 +88,19 @@ agent_created: true
 并且：**Patch 自身必须可独立阅读**，不依赖读者先读主文档。
 这对 AI 尤其友好——从任何文件切入都能拼出「当前生效的真相」，不被过期描述误导。
 
+**patch §⑥ 验收标准必须写成 Delta 三段**（硬性，可被机器合并的原因）：
+`### ADDED`（新验收标准，`AC-P⟨NNN⟩-N` 编号）/ `### MODIFIED`（替代主文档某条 `AC-N`，编号必须存在）/ `### REMOVED`（作废 `AC-N` + 原因）。
+没有对应类型的小节整节删除，不留空标题。结构门禁 S5 会校验 MODIFIED/REMOVED 的编号在主文档存在。
+
 **Patch 的收敛**（满足条件时执行）：
 - 并存期**以 patch 为准**——主文档被取代章节仅作历史
-- 时机：合并后稳定 ⟨14⟩ 天无回滚，或同一 feature 下 patch 累积 ≥ ⟨3⟩ 个
-- 动作：patch 合入主章节并移除取代标记 → patch 顶部标「已收敛（日期）」、文件保留 → changelog 记一条
+- 时机：合并后稳定 ⟨14⟩ 天无回滚，或同一 feature 下 patch 累积 ≥ ⟨3⟩ 个（`collar-status.sh` 会列出超期项）
+- 动作：`sh scripts/collar-converge.sh <PATCH-文件>` 机械合并 Delta 并标「已收敛」→ 按脚本列出的剩余手工项收尾（正文合入主章节并移除取代标记 / tests.md 清理 / 变更历史补记 / changelog 记一条）
 - **收敛不是删除 patch 文件**
 
 **Patch 改了验收标准 → 必须同步 `tests.md`（硬性）**：
-patch §⑥ 的验收标准用 `AC-P⟨NNN⟩-N` 编号，并回到同目录 `tests.md` 追加/更新对应测试点、
-在其「变更记录」留一行。否则 patch 生效了测试还停在旧版本——
+回到同目录 `tests.md` 追加/更新对应测试点、在其「变更记录」留一行
+（MODIFIED 的主文档 AC 回指编号不变，核对判定文本是否需要更新）。否则 patch 生效了测试还停在旧版本——
 这正是 patch 存在的意义（并行不打架）被反转成「并行后对不齐」。
 
 ### Step 5 — sunset 是状态机，不是删除
@@ -113,7 +123,9 @@ sunset 产出的是一份**带状态机的可执行迁移剧本**：评估 → �
 - [ ] 已建同目录 `tests.md`，每条 AC 至少对应一个测试点；无测试点的 AC 已登记为缺口
 - [ ] 影响面写清：动了哪些模块 / 接口 / 数据 / 配置
 - [ ] patch 已建双向指针，且可独立阅读
+- [ ] patch §⑥ 是 Delta 三段；MODIFIED/REMOVED 的 `AC-N` 在主文档存在；无空标题小节
 - [ ] patch 改动的验收标准已同步进 `tests.md`
+- [ ] feature §8 / patch §⑦ 实施任务已编号，已完成项已勾选
 - [ ] sunset 有状态机与回滚口径
 - [ ] 引用了 vendor 的，已标注来源
 
