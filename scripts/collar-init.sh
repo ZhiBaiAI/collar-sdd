@@ -83,7 +83,7 @@ RC=$?
 
 echo
 if [ "$RC" -eq 0 ]; then
-  echo "Next: ① 填完上面列出的 ⟨⟩ 占位符 ② git init ③ 让 AI 读 AGENTS.md 复述"
-  echo "      「项目是什么、负责哪个 spec」——答得出来即冒烟通过"
+  echo "Next: ① 填完上面列出的 ⟨⟩ 占位符 ② git init ③ sh scripts/collar-hooks.sh 装配提交关卡"
+  echo "      ④ 让 AI 读 AGENTS.md 复述「项目是什么、负责哪个 spec」——答得出来即冒烟通过"
 fi
 exit "$RC"

@@ -178,6 +178,7 @@ $(awk '
     id=$0; sub(/^[^`]*`/,"",id); sub(/`.*/,"",id)
     if (pend=="") printf "ERR\t### RENAMED 里 TO: `%s` 没有配对的 FROM:\n", id
     else pend=""
+    if (id !~ /^AC-P[0-9]+-[0-9]+$/) printf "ERR\tRENAMED TO 的 `%s` 必须是 AC-PNNN-N 形编号——普通 AC-N 会撞主文档编号体系并触发 S3 悬空引用\n", id
     mark(id,"RENAMED(TO)"); printf "NEW\t%s\n", id; next
   }
   sec!="" && sec!="RENAMED" && match($0,/^-[ ]*(\[[ xX]\][ ]*)?`AC-[A-Za-z0-9-]+`/) {

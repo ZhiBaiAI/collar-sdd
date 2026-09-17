@@ -108,11 +108,16 @@ while IFS= read -r SPEC; do
 done
 
 # 3) 日落进行中
+#    归档完成判据：状态字段含「已归档」，或归档日期字段填了真实日期（非 ⟨⟩）。
+#    不能全文搜「归档」——状态机里必有该词，会全部误跳过（曾经的死代码）。
 echo
 echo "[在途 sunset]"
 find docs/specs -name 'SUNSET-*.md' -not -path '*/_templates/*' -not -path '*/_archived/*' | sort | \
 while IFS= read -r S; do
-  grep -q '归档' "$S" && continue
+  grep -q '已归档' "$S" && continue
+  # 归档日期行：字段名含「归档」的表行、无任何 ⟨⟩ 占位、且值格里有真实日期
+  ROW=$(grep -E '\|[^|]*归档[^|]*\|' "$S" | grep -v '⟨' | grep -E '[0-9]{4}-[0-9]{2}-[0-9]{2}' || true)
+  [ -n "$ROW" ] && continue
   printf '  %s\n' "$S"
 done
 

@@ -1,0 +1,17 @@
+name: collar-check
+
+# 结构门禁 CI：与本地 git hooks（scripts/hooks/pre-commit）同一执行体。
+# hooks 是本地拦截，这里是仓库级兜底——未装配 hooks 的提交也跑不掉。
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  structure-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 结构门禁（S0–S7）
+        run: sh scripts/collar-check.sh
