@@ -31,14 +31,14 @@
 
 | 编号 | 层级 | 测什么 | 对应 AC | 代码位置 | 状态 |
 |---|---|---|---|---|---|
-| TC-1 | integration | ⟨给定 ⟨条件⟩，当调用 `/api/core/loop`，则响应 P95 < 2s⟩ | AC-1 | ⟨`src/core/loop.test.ts`⟩ | ⟨已实现⟩ |
+| TC-1 | integration | ⟨给定 ⟨条件⟩，当调用 `/api/core/loop`，则响应 P95 < 2s⟩ | AC-1 → AC-P001-4 | ⟨`src/core/loop.test.ts`⟩ | ⟨已实现⟩ |
 | TC-2 | unit | ⟨给定首次超时，当调用幂等接口，则重试且第二次成功时整体返回成功⟩ | AC-P001-1 | ⟨`src/core/retry.test.ts`⟩ | ⟨已实现⟩ |
 | TC-3 | unit | ⟨给定连续 3 次超时，当调用幂等接口，则最终失败且耗时 < 3s⟩ | AC-P001-2 | ⟨`src/core/retry.test.ts`⟩ | ⟨已实现⟩ |
 | TC-4 | unit | ⟨给定非幂等接口，当首次超时，则不重试直接失败⟩ | AC-P001-3 | ⟨`src/core/retry.test.ts`⟩ | ⟨已实现⟩ |
 
 **覆盖核对**：
 
-- [ ] spec §4 的 `AC-1` 与 [PATCH-001](./PATCH-001-超时重试.md) 的 `AC-P001-1..3` 都出现在「对应 AC」列
+- [ ] spec §4 的 `AC-1` 与 [PATCH-001](./PATCH-001-超时重试.md) 的 `AC-P001-1..4` 都出现在「对应 AC」列（AC-1 已被 patch RENAMED 为 AC-P001-4，TC-1 双写两个编号）
 - [ ] 没有指向不存在的 `AC-N`
 - [ ] `未实现` 的测试点都已在第 3 节登记缺口
 
@@ -69,7 +69,7 @@
 | 日期 | 触发 | 测试点变化 | 链接 |
 |---|---|---|---|
 | ⟨YYYY-MM-DD⟩ | feature V2 | 新增 TC-1；V1 时代（自建方案）的测试点随 SUNSET-001 作废，见下 | — |
-| ⟨YYYY-MM-DD⟩ | [PATCH-001](./PATCH-001-超时重试.md) | 新增 TC-2、TC-3、TC-4（超时重试相关验收标准） | [PATCH-001](./PATCH-001-超时重试.md) |
+| ⟨YYYY-MM-DD⟩ | [PATCH-001](./PATCH-001-超时重试.md) | 新增 TC-2、TC-3、TC-4（超时重试相关验收标准）；TC-1 对应 AC 随 RENAMED 双写为 `AC-1 → AC-P001-4` | [PATCH-001](./PATCH-001-超时重试.md) |
 | ⟨YYYY-MM-DD⟩ | [SUNSET-001](./SUNSET-001-V1自建方案.md) | **作废**：V1 自建方案的测试点（原 TC-1 ⟨调度器自研逻辑⟩）不再适用；记录保留作历史上下文 | [SUNSET-001](./SUNSET-001-V1自建方案.md) |
 
 > **patch 与 sunset 都改了测试范围，都必须留痕**：
