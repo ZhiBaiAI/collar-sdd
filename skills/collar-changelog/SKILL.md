@@ -47,7 +47,8 @@ argument-hint: ⟨可选 YYYY-MM，月度回顾用⟩
 | `refactor` | 结构重组，行为不变 |
 | `fix` | 缺陷修复 |
 | `chore` | 依赖、配置、文档等杂项 |
-| `BREAKING` | 破坏性变更（**必须加粗置顶**） |
+| `BREAKING` | 破坏性变更（**必须加粗置顶**，commit message 用 `!` 后缀表达） |
+| — | commit-msg 放行但上表未列出的类型（docs/test/ci/build/perf/style/revert）归 `chore` |
 
 ### Step 3 — 落盘
 

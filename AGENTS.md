@@ -45,9 +45,7 @@
 | 安装依赖 | ⟨`make setup`⟩ | |
 | 本地启动 | ⟨`make dev`⟩ | 端口 ⟨:3000⟩ |
 | 构建 | ⟨`make build`⟩ | |
-| 静态检查 | ⟨`make lint`⟩ | 质量门禁之一 |
-| 类型检查 | ⟨`make typecheck`⟩ | 质量门禁之一 |
-| 测试 | ⟨`make test`⟩ | 质量门禁之一 |
+| 质量门禁 | ⟨`make lint` / `make typecheck` / `make test`⟩ | collar.yaml gates，按技术栈装配 |
 
 ## 4. 关键约定速查表
 
@@ -58,8 +56,7 @@
 | 外置逻辑 | 提示词/配置外置到平台时必须保留 `//!` 锚点注释 | [context-stitching.md](docs/runbook/context-stitching.md) |
 | 分支策略 | 集成分支名 ⟨`releases/YYYYMMDD`⟩，个人分支不直接合主干 | [commit-gate.md](docs/runbook/commit-gate.md) |
 | 事实缺口 | 缺事实就显式标记「待确认」并发起提问，禁止用猜测填充继续推进 | [conventions.md](docs/runbook/conventions.md) |
-| 测试文档 | 功能点的测试点写在同目录 `tests.md`，验收标准编号 `AC-N` 与之对齐；跨功能点知识查总入口 | [testing.md](docs/runbook/testing.md) |
-| 验收编号 | spec §5 验收标准编号 `AC-N`，`tests.md` 每个测试点必须回指 | [conventions.md](docs/runbook/conventions.md) |
+| 验收与测试 | spec §5 编号 `AC-N`，同目录 `tests.md` 测试点逐条回指；跨功能点知识去 testing.md | [testing.md](docs/runbook/testing.md) |
 | 文档时态 | 现状文档只写现在时；历史叙述只进 changelog / ADR / sunset / 归档区 | [conventions.md](docs/runbook/conventions.md) |
 
 完整表见 [关键约定](docs/runbook/conventions.md)。
