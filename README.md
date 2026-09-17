@@ -20,8 +20,8 @@
 3. **填配置占位符**：只替换**活文档**里的 `⟨⟩` —— `AGENTS.md`（重点：项目是什么/仓库地图/快速命令三节，保持 ≤120 行）、`collar.yaml`、本文件标题、各 `docs/*/README.md` 与 `docs/runbook/*` 的默认值。  
    **不要动 `_templates/`、`_template-*` 和 `skills/*/SKILL.md` 里的占位符** —— 那些是模板本体，用到时才填。
 4. **铺站点地图**：在 `docs/specs/` 下按业务地图建 `NN_[业务地图]XX域/`，见 [docs/specs/README.md](docs/specs/README.md)。
-5. **装配提交关卡**：按 [docs/runbook/commit-gate.md](docs/runbook/commit-gate.md) 挂上 git hooks。
-6. **git init**：新项目从第一个 commit 开始，`collar-changelog` 就有东西可记了。
+5. **git init**：新项目从第一个 commit 开始，`collar-changelog` 就有东西可记了。
+6. **装配提交关卡**：`sh scripts/collar-hooks.sh`（hooks 随模板自带，详见 [docs/runbook/commit-gate.md](docs/runbook/commit-gate.md)）。
 7. **跑一次冒烟**：让 AI 读 `AGENTS.md` 后复述「这个项目是什么、我负责哪个 spec」——答得出来就说明上下文通了。
 
 ### 落地清理清单（复制后删除 / 保留）
@@ -48,7 +48,9 @@
 │   ├── collar-new.sh         #   从模板建 feature / patch / sunset（自动编号）
 │   ├── collar-status.sh      #   在途导航：未收敛 patch / 缺口 / 超期项 + --specs 清单
 │   ├── collar-converge.sh    #   patch 机械收敛：Delta 三段合并进 spec.md
-│   └── collar-init.sh        #   冷启执行体：清理示范内容 + 扫占位符 + 跑门禁
+│   ├── collar-init.sh        #   冷启执行体：清理示范内容 + 扫占位符 + 跑门禁
+│   ├── collar-hooks.sh       #   装配 git hooks（core.hooksPath → scripts/hooks/）
+│   └── hooks/                #   pre-commit / commit-msg / post-commit / pre-push 钩子本体
 ├── src/                      # 项目源码（全部代码放这里，含测试）
 │                             #   新增顶层目录时需同步 AGENTS.md 仓库地图与 collar.yaml 的 allow_write
 ├── skills/                   # 六个 collar-* Skill（项目自带，与 AI 工具无关）
