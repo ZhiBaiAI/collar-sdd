@@ -19,8 +19,8 @@
 3. **Fill in config placeholders**: only replace `⟨⟩` placeholders in the **live docs** — `AGENTS.md` (focus on "What is this project / Repo map / Quick commands"; keep it ≤ 120 lines), `collar.yaml`, this file's title, and defaults in each `docs/*/README.md` and `docs/runbook/*`.
    **Do NOT touch placeholders inside `_templates/`, `_template-*`, or `skills/*/SKILL.md`** — those are template internals, filled only when used.
 4. **Lay out the site map**: create `NN_[Domain]xx/` directories under `docs/specs/` following your business map — see [docs/specs/README.md](docs/specs/README.md).
-5. **Wire the commit gate**: install git hooks per [docs/runbook/commit-gate.md](docs/runbook/commit-gate.md).
-6. **git init**: the very first commit gives `collar-changelog` something to record.
+5. **git init**: the very first commit gives `collar-changelog` something to record.
+6. **Wire the commit gate**: run `sh scripts/collar-hooks.sh` (hooks ship with the template — see [docs/runbook/commit-gate.md](docs/runbook/commit-gate.md)).
 7. **Run a smoke test**: ask your AI to read `AGENTS.md` and answer "what is this project and which spec do I own?" — a correct answer means the context pipeline works.
 
 ### Cleanup Checklist (delete / keep after copying)
@@ -47,7 +47,9 @@
 │   ├── collar-new.sh         #   Scaffold a feature / patch / sunset from templates (auto-numbered)
 │   ├── collar-status.sh      #   In-flight navigator: unconverged patches / gaps / overdue items + --specs listing
 │   ├── collar-converge.sh    #   Mechanical patch convergence: merges Delta sections into spec.md
-│   └── collar-init.sh        #   Cold-start executor: cleans demo content + lists placeholders + runs the gate
+│   ├── collar-init.sh        #   Cold-start executor: cleans demo content + lists placeholders + runs the gate
+│   ├── collar-hooks.sh       #   Installs git hooks (core.hooksPath → scripts/hooks/)
+│   └── hooks/                #   The pre-commit / commit-msg / post-commit / pre-push hook bodies
 ├── src/                      # Project source code (all code lives here, tests included)
 │                             #   When adding top-level dirs, update the repo map in AGENTS.md
 │                             #   and allow_write in collar.yaml

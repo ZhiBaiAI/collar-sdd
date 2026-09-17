@@ -111,22 +111,30 @@ hooks 挡的是单仓提交质量；哨兵机挡的是**多人分支各自全绿
 
 ## 装配方式
 
-结构门禁（collar-check）无需装配，复制即生效。质量门禁按你的技术栈选择装配方式，职责不变：
+结构门禁（collar-check）无需装配，复制即生效。**git hooks 随模板自带**，clone / 冷启后跑一次：
+
+```bash
+sh scripts/collar-hooks.sh        # 装：core.hooksPath 指向 scripts/hooks/
+sh scripts/collar-hooks.sh --check   # 验：装配状态与执行位
+sh scripts/collar-hooks.sh --remove  # 卸：恢复默认 .git/hooks
+```
+
+用 `core.hooksPath` 而不是拷贝进 `.git/hooks`：hook 内容留在仓库里版本化、
+全团队共享同一份；代价是每个 clone 跑一次安装脚本。
+
+| 钩子 | 放什么 | 脚本行为 |
+|---|---|---|
+| `scripts/hooks/pre-commit` | ① 结构门禁（collar-check）+ ② 质量门禁 | 跑 collar-check 后，逐条执行 collar.yaml `kind: quality` 的 `cmd`——仍是 ⟨占位符⟩ 的自动跳过 |
+| `scripts/hooks/commit-msg` | 规范 commit message（便于 changelog 提取） | 首行须为「<类型>(<范围>): <说明>」，WIP 豁免；缺 checklist 留痕打印 hint 不拦截 |
+| `scripts/hooks/post-commit` | ③④ 知识沉淀 | 提交触及 specs/src/scripts 时提醒补 changelog/runbook（不阻塞） |
+| `scripts/hooks/pre-push` | ⑤⑥ 差异检测 + 缝补检查 | 结构门禁复跑 + ⑤⑥⑦ 协议项自查清单 |
+
+其他装配方式（职责不变，钩子里的逻辑照旧）：
 
 | 方式 | 适用 | 挂接点 |
 |---|---|---|
-| git hooks（`.git/hooks/` 或 `core.hooksPath`） | 任意语言 | `pre-commit` / `commit-msg` / `post-commit` |
-| 包管理器钩子 | Node（husky）/ Python（pre-commit 框架） | 同上 |
-| CI 流水线 | 团队项目 | PR 检查阶段（**注意**：此时已错过本地沉淀时机，建议本地 + CI 双挂） |
-
-**推荐分工**：
-
-| 钩子 | 放什么 | 原因 |
-|---|---|---|
-| `pre-commit` | ① 结构门禁（collar-check）+ ② 质量门禁 | 快、可拦截 |
-| `commit-msg` | 规范 commit message（便于 changelog 提取） | 需要 message 内容 |
-| `post-commit` | ③④ 知识沉淀 | 提交已完成，不阻塞开发 |
-| `pre-push` | ⑤⑥ 差异检测 + 缝补检查 | 合并前最后一次把关 |
+| 包管理器钩子 | Node（husky）/ Python（pre-commit 框架） | 调用同四个脚本即可 |
+| CI 流水线 | 团队项目 | PR 检查阶段跑 `sh scripts/collar-check.sh`（**注意**：此时已错过本地沉淀时机，建议本地 + CI 双挂） |
 
 ---
 

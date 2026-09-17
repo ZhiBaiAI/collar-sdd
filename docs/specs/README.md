@@ -51,7 +51,8 @@ docs/specs/
 
 **配套脚本**（`scripts/`，复制即生效）：`collar-new.sh` 从模板自动编号建变更、
 `collar-status.sh` 列出在途事项与超期 patch、`collar-converge.sh` 执行 patch 机械收敛、
-`collar-init.sh` 冷启清理示范内容。脚本输出末尾的 `Next:` 行告诉下一步做什么。
+`collar-init.sh` 冷启清理示范内容、`collar-hooks.sh` 装配 git hooks（`scripts/hooks/`）。
+脚本输出末尾的 `Next:` 行告诉下一步做什么。
 
 ### 为什么这样切分能让人天然分开
 
