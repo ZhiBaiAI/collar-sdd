@@ -24,6 +24,14 @@
 6. **装配提交关卡**：`sh scripts/collar-hooks.sh`（hooks 随模板自带，详见 [docs/runbook/commit-gate.md](docs/runbook/commit-gate.md)）。
 7. **跑一次冒烟**：让 AI 读 `AGENTS.md` 后复述「这个项目是什么、我负责哪个 spec」——答得出来就说明上下文通了。
 
+### 跟进模板更新
+
+复制之后上游仍在演进。`sh scripts/collar-sync.sh` 按「谁拥有这文件」三层处理：
+`scripts/`、`skills/`、`docs/specs/_templates/`、`VERSION` 属机械资产**直接覆盖**；
+`docs/runbook/`、各 `docs/*/README.md` 属骨架文档**只出 diff 报告人工挑**；
+`AGENTS.md` 已填内容、`collar.yaml`、`docs/specs/` 业务内容、`docs/changelog/` 属项目自有**不碰**。
+版本号见根目录 `VERSION`；上游发版即 bump。
+
 ### 落地清理清单（复制后删除 / 保留）
 
 | 处置       | 内容                                                                                     |
@@ -50,6 +58,7 @@
 │   ├── collar-converge.sh    #   patch 机械收敛：Delta 三段合并进 spec.md
 │   ├── collar-init.sh        #   冷启执行体：清理示范内容 + 扫占位符 + 跑门禁
 │   ├── collar-hooks.sh       #   装配 git hooks（core.hooksPath → scripts/hooks/）
+│   ├── collar-sync.sh        #   模板升级：从上游 collar-sdd 拉取机械资产
 │   └── hooks/                #   pre-commit / commit-msg / post-commit / pre-push 钩子本体
 ├── src/                      # 项目源码（全部代码放这里，含测试）
 │                             #   新增顶层目录时需同步 AGENTS.md 仓库地图与 collar.yaml 的 allow_write

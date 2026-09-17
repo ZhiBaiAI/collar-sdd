@@ -27,7 +27,7 @@ echo
 #    （grep 2>/dev/null 会静默吞掉「文件不存在」，缺骨架必须显式失败）
 # ---------------------------------------------------------------------------
 S0_BROKEN=0
-for REQUIRED in AGENTS.md collar.yaml docs/README.md docs/specs/README.md \
+for REQUIRED in AGENTS.md collar.yaml VERSION docs/README.md docs/specs/README.md \
                 docs/runbook/commit-gate.md docs/runbook/conventions.md \
                 docs/architecture/README.md scripts/collar-check.sh; do
   if [ ! -f "$REQUIRED" ]; then
