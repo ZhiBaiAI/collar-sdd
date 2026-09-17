@@ -23,6 +23,14 @@
 6. **Wire the commit gate**: run `sh scripts/collar-hooks.sh` (hooks ship with the template — see [docs/runbook/commit-gate.md](docs/runbook/commit-gate.md)).
 7. **Run a smoke test**: ask your AI to read `AGENTS.md` and answer "what is this project and which spec do I own?" — a correct answer means the context pipeline works.
 
+### Tracking Template Updates
+
+The upstream template keeps evolving after you copy it. `sh scripts/collar-sync.sh` applies a three-layer ownership rule:
+`scripts/`, `skills/`, `docs/specs/_templates/`, `VERSION` are mechanical assets — **overwritten directly**;
+`docs/runbook/` and `docs/*/README.md` are skeleton docs — **a diff report is produced for manual picking**;
+your filled `AGENTS.md`, `collar.yaml`, `docs/specs/` business content, `docs/changelog/` are project-owned — **untouched**.
+The template version lives in the root `VERSION` file; upstream releases bump it.
+
 ### Cleanup Checklist (delete / keep after copying)
 
 | Action | Content |
@@ -49,6 +57,7 @@
 │   ├── collar-converge.sh    #   Mechanical patch convergence: merges Delta sections into spec.md
 │   ├── collar-init.sh        #   Cold-start executor: cleans demo content + lists placeholders + runs the gate
 │   ├── collar-hooks.sh       #   Installs git hooks (core.hooksPath → scripts/hooks/)
+│   ├── collar-sync.sh        #   Template upgrade: pulls mechanical assets from upstream collar-sdd
 │   └── hooks/                #   The pre-commit / commit-msg / post-commit / pre-push hook bodies
 ├── src/                      # Project source code (all code lives here, tests included)
 │                             #   When adding top-level dirs, update the repo map in AGENTS.md
