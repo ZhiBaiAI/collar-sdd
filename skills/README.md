@@ -50,6 +50,12 @@ git commit
 4. 同步更新本文件速查表与该模块的 README
 5. 在 SKILL.md 末尾写明「与其他 Skill 的协作」，避免职责打架
 
+**结构约定（六个 SKILL.md 统一）**：
+- frontmatter：`name` / `description`（含触发词）/ `agent_created` / 有参数时加 `argument-hint`
+- `## 护栏`：硬否定句集中一节（永远不许做的事），散落在叙述文里的禁令提炼到这里，可扫读
+- `Next:` 行：主流程末尾给下一步衔接（脚本命令 / 交接给哪个 Skill）
+- 有被动触发输出的 Skill（如 specs 模式B）写**输出契约**：记分卡 + CRITICAL/WARNING/SUGGESTION 分级，每条附 `文件:行` 与可操作建议，拿不准往轻了报
+
 ---
 
 ## 各工具如何加载
