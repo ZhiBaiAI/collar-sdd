@@ -17,19 +17,19 @@
 |---|---|---|---|---|---|
 | TC-1 | unit | 给定 `keyword` 为空，当调用 `/api/demo`，则返回全部条目且 `total` 等于条目总数 | AC-1 | ⟨`src/demo/list.test.ts`⟩ | 已实现 |
 | TC-2 | unit | 给定 `keyword` 命中 ⟨2⟩ 条，当调用接口，则只返回这 2 条且 `total=2` | AC-1 | ⟨`src/demo/list.test.ts`⟩ | 已实现 |
-| TC-3 | integration | 给定 `pageSize=1000`，当调用接口，则响应 `pageSize` 被截断为 100，不报错 | AC-P001-3（细化 AC-2） | ⟨`src/demo/api.test.ts`⟩ | 已实现 |
+| TC-3 | integration | 给定 `pageSize=1000`，当调用接口，则响应 `pageSize` 被截断为 100，不报错 | AC-2（PATCH-001 MODIFIED） | ⟨`src/demo/api.test.ts`⟩ | 已实现 |
 | TC-4 | integration | 给定仅传 `cursor`，当翻到第 1000 条，则响应时间 < 200ms | AC-P001-1 | ⟨`src/demo/cursor.test.ts`⟩ | 已实现 |
 | TC-5 | integration | 给定传已废弃的 `page`，当处于灰度期，则正常返回并输出告警日志 | AC-P001-2 | ⟨`src/demo/api.test.ts`⟩ | 已实现 |
 
 **覆盖核对**：
 
-- [x] spec §5 的 `AC-1`、`AC-2`，与 [PATCH-001](./PATCH-001-分页策略.md) 的 `AC-P001-1..3`，都已出现在「对应 AC」列
+- [x] spec §5 的 `AC-1`、`AC-2`，与 [PATCH-001](./PATCH-001-分页策略.md) 的 `AC-P001-1..2`，都已出现在「对应 AC」列
 - [x] 没有指向不存在的 `AC-N`
 - [x] 无 `未实现` 测试点（本示例全绿）
 
-> **注意 AC-2 与 AC-P001-3 的关系**：spec §5 的 `AC-2` 只说「超过上限被截断」，
-> 没写上限是多少；PATCH-001 把上限定为 **100**，因此 TC-3 回指的是 patch 的编号。
-> **主文档给意图，patch 给具体数值**——测试点要回指「具体到可断言」的那一条。
+> **注意 AC-2 的 MODIFIED 语义**：spec §5 的 `AC-2` 原本只说「超过上限被截断」，
+> 没写上限是多少；PATCH-001 以 MODIFIED delta 把它定为 **100**，TC-3 仍回指 `AC-2`。
+> **测试点回指编号不变的主文档 AC，patch 的 delta 只是它的最新文本。**
 
 ---
 

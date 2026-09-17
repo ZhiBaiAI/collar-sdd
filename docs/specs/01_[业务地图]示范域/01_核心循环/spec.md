@@ -11,7 +11,7 @@
 |---|---|---|---|
 | **V4** | blueprint | 🔬 预研中（还没定型，所以**不在 specs，在 wiki**） | [wiki/blue-print](../../../wiki/blue-print/%5B技术方案%5D核心循环V4-MVP.md) |
 | **V2** | **feature** | ✅ **当前正式版（本文件）** | 本文件 |
-| V2 迭代 | patch | ✅ 已合并 | [PATCH-001-超时重试](./PATCH-001-超时重试.md) |
+| V2 迭代 | patch | ✅ 已验证（并存期以 patch 为准，待收敛） | [PATCH-001-超时重试](./PATCH-001-超时重试.md) |
 | **V1** | sunset | 🗄 日落归档中 | [SUNSET-001-V1自建方案](./SUNSET-001-V1自建方案.md) |
 
 > **四种类型不是互斥的阶段，而是并存的状态。**
