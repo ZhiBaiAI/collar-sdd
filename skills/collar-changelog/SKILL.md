@@ -2,6 +2,7 @@
 name: collar-changelog
 description: 把「做了什么」沉淀成时间线。由 git commit 强制触发（提交关卡的一环），从提交中提取变更、分类、关联 Spec 坐标，落到 docs/changelog/YYYY/YYYY-MM.md。当用户说「提交」「commit」「记录一下这次改动」「这个月改了什么」「发版说明」时使用。
 agent_created: true
+argument-hint: ⟨可选 YYYY-MM，月度回顾用⟩
 ---
 
 # collar-changelog — 变更时间线记录员
@@ -77,13 +78,17 @@ agent_created: true
 
 ---
 
-## 质量红线
+## 护栏
 
 - ❌ 不写「优化了一些代码」这种无信息量的描述——**写结果，不写过程**
 - ❌ 不遗漏作者（多人协同第一线索）
 - ❌ 不把同一件事记两遍（一次提交 = 一条记录）
+- ❌ 改写历史条目——时间线只增不改，更正用新条目
+- ❌ 写会话指代词（S7 门禁按词表拦截，词表见 `scripts/collar-check.sh`）
 - ✅ 破坏性变更必须显眼，附带迁移方式
 - ✅ 每条尽量能反查到 spec 坐标，让时间线和站点地图互相索引
+
+Next: 落盘后随提交进 `pre-commit` 门禁（S6 强制同次提交）；月度回顾先 `collar-status.sh --specs` 对齐坐标。
 
 ---
 
