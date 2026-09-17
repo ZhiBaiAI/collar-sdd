@@ -118,7 +118,8 @@ authoring:
       - "§8 实施任务编号 T-N，提交时按覆盖勾选，全勾且无未决差异才许标已验证"
     patch:
       - "patch 自身必须可独立阅读，不依赖先读主文档"
-      - "§⑥ 验收标准用 Delta 三段：ADDED（AC-P 编号）/ MODIFIED / REMOVED（引用主文档 AC-N，必须存在）"
+      - "§⑥ 验收标准用 Delta 四段：ADDED（AC-P 编号）/ MODIFIED / REMOVED（引用主文档 AC-N，必须存在）/ RENAMED（FROM:旧号→TO:新号成对）"
+      - "同一 AC-N 不跨 delta 小节；没有内容的小节整节删除"
       - "双向指针缺一不落盘；改了验收标准必须同步同目录 tests.md"
       - "§⑦ 实施任务编号 T-PNNN-N；收敛走 collar-converge.sh，文件保留不删除"
     changelog:
