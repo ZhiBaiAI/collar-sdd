@@ -1,25 +1,42 @@
 # Collar SDD — The open-source template that makes every AI session understand your project
 
-> **In one sentence**: a project scaffold that puts a "collar" on your AI agent — for an agent, knowledge it can't see doesn't exist.
-> Collar writes project context into repository files — **structured, versioned, automated** — so AI stops re-ingesting context every session.
->
-> - **What it is**: an `AGENTS.md` entry map + a six-module structured knowledge base (specs / changelog / architecture / runbook / vendor / wiki) + six companion Skills + a `collar.yaml` boundary & gate declaration + a unified commit gate
-> - **What it solves**: AI coding on real projects is "locally correct, globally wrong" — the root cause is missing and broken context, not model capability
-> - **How to use**: copy this repo into your project root, follow the 7-step quick start, ~15 minutes
-> - **Tech-agnostic**: no framework lock-in, no AI-tool lock-in (Cursor / Claude Code / WorkBuddy / any agent)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![PRs Welcome](https://img.shields.io/badge/PRs%20welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 [中文](README.md) | English
+
+> A project scaffold that puts a "collar" on your AI agent — for an agent, knowledge it can't see doesn't exist.
+> Collar writes project context into repository files — **structured, versioned, automated** — so AI stops re-ingesting context every session.
+
+## Why
+
+AI coding on real projects keeps being "locally correct, globally wrong": the function is right, but a convention elsewhere just broke. The root cause is not model capability — it's missing and broken context. A session ends and its conclusions evaporate; a new session starts and the AI knows nothing; people and tools work in parallel and nobody can tell which knowledge is current.
+
+Collar's answer: make the repository itself the AI's memory. Knowledge lands in files by convention, an entry map tells the agent where to read, and gates keep those files from rotting.
+
+## What it is
+
+| Component | Role |
+|---|---|
+| `AGENTS.md` entry map | The single entry point for every agent session, ≤120 lines, navigation only |
+| Six-module knowledge base | specs (intent) · changelog (timeline) · architecture (structure & decisions) · runbook (pitfalls & conventions) · vendor (external references) · wiki (free-form) |
+| Six companion Skills | Tool-agnostic maintenance specs defining how each module is read and written |
+| `collar.yaml` three-layer collar | Identity (what it knows) · Boundary (what it may change, deny-by-default) · Validation (whether the change is right) |
+| Unified commit gate | One git commit = structural gate + knowledge deposit + spec-drift check, all at once |
+
+All of the above is **tech-agnostic**: no framework lock-in, no AI-tool lock-in (Cursor / Claude Code / WorkBuddy / any agent).
+
+The companion [collar-board](https://github.com/ZhiBaiAI/collar-board) renders the knowledge base as a visual board — project status at a glance (see below).
 
 ---
 
 ## Quick Start (15-minute cold start for a new project)
 
-1. **Copy the skeleton** into your new project root (the template ships without `.git`, so the copy starts clean).
+1. **Copy the skeleton** into your new project root. An archive download ships without `.git`, so the copy starts clean; if you `git clone`d it, delete `.git` first so upstream remotes don't leak into the new project.
 2. **Remove the demo content** (do this right after copying — checklist below; the mechanical parts can be run via `sh scripts/collar-init.sh --yes`).
 3. **Fill in config placeholders**: only replace `⟨⟩` placeholders in the **live docs** — `AGENTS.md` (focus on "What is this project / Repo map / Quick commands"; keep it ≤ 120 lines), `collar.yaml`, this file's title, and defaults in each `docs/*/README.md` and `docs/runbook/*`.
    **Do NOT touch placeholders inside `_templates/`, `_template-*`, or `skills/*/SKILL.md`** — those are template internals, filled only when used.
 4. **Lay out the site map**: create `NN_[Domain]xx/` directories under `docs/specs/` following your business map — see [docs/specs/README.md](docs/specs/README.md).
-5. **git init**: the very first commit gives `collar-changelog` something to record.
+5. **git init**: the sooner the better — from the very first commit, `collar-changelog` has something to record.
 6. **Wire the commit gate**: run `sh scripts/collar-hooks.sh` (hooks ship with the template — see [docs/runbook/commit-gate.md](docs/runbook/commit-gate.md)).
 7. **Run a smoke test**: ask your AI to read `AGENTS.md` and answer "what is this project and which spec do I own?" — a correct answer means the context pipeline works.
 
@@ -40,7 +57,7 @@ The template version lives in the root `VERSION` file; upstream releases bump it
 | 🗑 Empty examples | keep only the title and intro lines in `docs/changelog/2026/2026-09.md`; remove the ⟨示例域⟩ row from the claim table in `docs/specs/README.md` |
 | ✅ Keep | `docs/wiki/blue-print/[讨论稿]哨兵机.md` (a pre-seeded advanced blueprint, not a demo) |
 | ✅ Keep | `docs/specs/_templates/`, `docs/architecture/ADR/0000`, `docs/runbook/_template-*` (template internals) |
-| ✂ After cold start | delete the "Quick Start", "Cleanup Checklist" and "Adopt as You Grow" sections of this file (usage instructions, obsolete once onboarded). **This file may be rewritten as your project's README**: the discipline & tailoring rules below are dual-written into runtime files (`collar.yaml` gates / `conventions.md` / `skills/README.md`), so replacing this README affects nothing |
+| ✂ After cold start | delete the "Quick Start", "Cleanup Checklist" and "Adopt as You Grow" sections of this file (usage instructions, obsolete once onboarded; the "Tracking Template Updates" subsection inside Quick Start is long-term guidance — keep it). **This file may be rewritten as your project's README**: the discipline & tailoring rules below are dual-written into runtime files (`collar.yaml` gates / `conventions.md` / `skills/README.md`), so replacing this README affects nothing |
 
 ---
 
@@ -96,6 +113,24 @@ Most mechanisms work out of the box; a few are pre-seeded blueprints to activate
 
 ---
 
+## Companion dashboard: collar-board
+
+The spec structures project knowledge into the repo, but seeing the project's status at a glance still means opening Markdown files one by one. The companion
+[collar-board](https://github.com/ZhiBaiAI/collar-board) parses any Collar SDD project into a browser board —
+what the project is, business map, in-flight changes, decision lineage, change timeline, structural facts:
+whether the discipline holds and which changes are still unconverged, visible at a glance.
+
+```bash
+git clone https://github.com/ZhiBaiAI/collar-board && cd collar-board
+npm start          # open http://localhost:5173, click "Import project", pick the project root
+```
+
+Two design lines shared with Collar: **read-only** (never touches the viewed project),
+**no scoring** (only mechanically verifiable facts, each with its source; judgment stays with humans).
+Requires Chrome / Edge (directory reading is currently Chromium-only).
+
+---
+
 ## Discipline (what keeps this system from rotting)
 
 1. **Knowledge must land in files.** A conclusion that stays in the chat was never concluded.
@@ -116,3 +151,10 @@ Most mechanisms work out of the box; a few are pre-seeded blueprints to activate
 - Numeric directory prefixes (`00_` / `01_`) keep the site map naturally ordered — do not switch to alphabetical sorting.
 - `skills/` is **AI-tool agnostic**. When switching tools, only change symlinks or config —
   never copy Skill content into tool-specific directories. Multiple copies of the truth always rot.
+
+---
+
+## Contributing & License
+
+Issues and PRs are welcome — this repo runs on Collar SDD discipline itself; see
+[CONTRIBUTING.md](CONTRIBUTING.md) for the commit process. Released under the [MIT License](LICENSE).
