@@ -58,6 +58,7 @@
 | 事实缺口 | 缺事实就显式标记「待确认」并发起提问，禁止用猜测填充继续推进 | [conventions.md](docs/runbook/conventions.md) |
 | 验收与测试 | spec §5 编号 `AC-N`，同目录 `tests.md` 测试点逐条回指；跨功能点知识去 testing.md | [testing.md](docs/runbook/testing.md) |
 | 文档时态 | 现状文档只写现在时；历史叙述只进 changelog / ADR / sunset / 归档区 | [conventions.md](docs/runbook/conventions.md) |
+| 进度转移 | 状态只能经脚本/CLI 推进，Agent 不得直接改状态文件与勾选位 | [conventions.md](docs/runbook/conventions.md) |
 
 完整表见 [关键约定](docs/runbook/conventions.md)。
 
