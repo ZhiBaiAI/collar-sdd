@@ -60,6 +60,7 @@
 | 文档时态 | 现状文档只写现在时；历史叙述只进 changelog / ADR / sunset / 归档区 | [conventions.md](docs/runbook/conventions.md) |
 | 进度转移 | 状态只能经脚本/CLI 推进，Agent 不得直接改状态文件与勾选位 | [conventions.md](docs/runbook/conventions.md) |
 | 周期记账 | 执行时间与接手等待分开记；静默只作排查入口，先还原上次交接 | [conventions.md](docs/runbook/conventions.md) |
+| 提效核算 | 只认端到端时间、返工成本、上线缺陷三项；不认生成速度 | [conventions.md](docs/runbook/conventions.md) |
 
 完整表见 [关键约定](docs/runbook/conventions.md)。
 
