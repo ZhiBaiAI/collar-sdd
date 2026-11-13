@@ -17,7 +17,7 @@ Collar 的解法是让仓库本身成为 AI 的记忆：知识按规范落盘成
 
 | 组成 | 作用 |
 |---|---|
-| `AGENTS.md` 入口地图 | Agent 每次会话的唯一入口，≤120 行只做导航 |
+| `AGENTS.md` 入口地图 | Agent 每次会话的唯一入口，只做导航（结构由 S1 校验） |
 | 六模块知识库 | specs（意图源）· changelog（时间线）· architecture（结构与决策）· runbook（坑与约定）· vendor（外部参考）· wiki（自由知识） |
 | 六个配套 Skill | 与 AI 工具无关的模块维护规范，规定每个模块怎么读写 |
 | `collar.yaml` 三层项圈 | Identity（知道什么）· Boundary（能改什么，默认拒绝）· Validation（改得对不对） |
@@ -33,7 +33,7 @@ Collar 的解法是让仓库本身成为 AI 的记忆：知识按规范落盘成
 
 1. **复制骨架**：把本目录拷到新项目根。下载压缩包得到的副本不带 `.git`，复制即干净；若是 `git clone` 下来的，先删掉 `.git`，避免把上游远端配置带进新项目。
 2. **清理示范内容**：清单见下表；机械部分可用 `sh scripts/collar-init.sh --yes` 一并完成。
-3. **填配置占位符**：只替换**活文档**里的 `⟨⟩` —— `AGENTS.md`（重点：项目是什么/仓库地图/快速命令三节，保持 ≤120 行）、`collar.yaml`、本文件标题、各 `docs/*/README.md` 与 `docs/runbook/*` 的默认值。  
+3. **填配置占位符**：只替换**活文档**里的 `⟨⟩` —— `AGENTS.md`（重点：项目是什么/仓库地图/快速命令三节，只写导航不写解释）、`collar.yaml`、本文件标题、各 `docs/*/README.md` 与 `docs/runbook/*` 的默认值。  
    **不要动 `_templates/`、`_template-*` 和 `skills/*/SKILL.md` 里的占位符** —— 那些是模板本体，用到时才填。
 4. **铺站点地图**：在 `docs/specs/` 下按业务地图建 `NN_[业务地图]XX域/`，见 [docs/specs/README.md](docs/specs/README.md)。
 5. **git init**：越早越好——从第一个 commit 起，`collar-changelog` 就有东西可记。
@@ -65,7 +65,7 @@ Collar 的解法是让仓库本身成为 AI 的记忆：知识按规范落盘成
 
 ```
 .
-├── AGENTS.md                 # Agent 唯一入口地图（≤120 行，只导航）
+├── AGENTS.md                 # Agent 唯一入口地图（只导航）
 ├── collar.yaml               # Identity / Boundary / Validation 三层声明
 ├── scripts/                  # 门禁与操作脚本（语言无关，复制即生效）
 │   ├── collar-check.sh       #   结构门禁：骨架 / 行数 / AC 对齐 / 双向指针+delta / 会话指代等 8 项

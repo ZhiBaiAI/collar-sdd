@@ -62,7 +62,7 @@ commit-checklist: 1✅ 2✅ 3✅ 4✅ 5✅ 6✅ 7✅
 
 ### ⑥ 入口地图守卫
 
-- [ ] `AGENTS.md` ≤ 120 行且未逼近 115 守卫线；逼近则已把细节迁到 `docs/` 并只留摘要 + 链接
+- [ ] `AGENTS.md` 仍只做导航（`collar-check` S1 已自动校验结构：两节齐全 / 代码块 <50% / 无超长行）
 - [ ] 现状类文档（`AGENTS.md`、各 `README.md`、架构视图）只写现在时事实——
       没有引入历史变迁词或会话指代（如「以前 / 不再 / 新增了检查项」这类写法，
       检查规则见 `scripts/collar-check.sh` S7 注释；历史叙述只进 changelog / ADR / sunset / `_archived/`）
@@ -72,7 +72,7 @@ commit-checklist: 1✅ 2✅ 3✅ 4✅ 5✅ 6✅ 7✅
 - [ ] 本次是否把逻辑外置出代码（提示词 / 配置 / 脚本 / 规则）？
   - 否 → 勾选通过
   - 是 → 已按 [context-stitching.md](context-stitching.md) 缝补（MCP 通道 / `//!` 锚点 / 环境声明），
-    并登记进 [anchor-registry.md](anchor-registry.md)
+    并在脚本头部补 `//!` 锚点注释后重跑 `sh scripts/collar-anchors.sh`（登记册自动生成）
 - [ ] 未缝补的项已在 ADR「后果」中登记为技术债（写明责任人与计划日期）
 
 ---

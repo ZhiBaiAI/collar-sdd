@@ -73,5 +73,5 @@ agent_created: true
 
 ## 登记
 
-填完请把该 MCP 登记进 [anchor-registry.md](anchor-registry.md)，
+填完后在脚本头部补 `//!` 锚点注释并重跑 `sh scripts/collar-anchors.sh`，登记册自动更新（无需手写表格），
 并在 `collar.yaml` 的 `boundary.read_only_channels` 中声明。

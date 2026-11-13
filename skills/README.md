@@ -37,7 +37,7 @@ git commit
   └─ collar-specs     → 检「代码是否偏离意图」（只报不改）
 ```
 
-另有 `collar-runbook` 兼任 **AGENTS.md 行数守卫**（>115 行强制迁出）。
+另有 `collar-runbook` 兼任 **AGENTS.md 结构守卫**（判据由 `collar-check` S1 执行）。
 详见 [commit-gate.md](../docs/runbook/commit-gate.md)。
 
 ---

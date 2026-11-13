@@ -17,6 +17,7 @@ FAIL=0
 note() { printf '  %s\n' "$1"; }
 fail() { FAIL=1; printf 'FAIL %s\n' "$1"; note "修法：$2"; }
 pass() { printf 'ok   %s\n' "$1"; }
+warn() { printf 'warn %s\n' "$1"; note "提示：$2"; }
 
 echo "collar-check — 结构门禁"
 echo "repo: $ROOT"
@@ -44,14 +45,46 @@ done
 [ "$S0_BROKEN" -eq 0 ] && pass "S0 模板骨架完整（核心文件与目录齐全）"
 
 # ---------------------------------------------------------------------------
-# S1 入口地图行数：AGENTS.md ≤ 120 行
+# S1 入口地图结构：AGENTS.md 只做导航，不做解释
+#
+# 判据从「绝对行数」改为「内容类型」——行数是行数的代理指标，会反向塑造内容
+# （为了不超行数把该放入口的东西挪走）。这里查真正决定入口可否被扫读的三件事：
+#   ① 必有「仓库地图」与「知识库六模块」两节 —— 入口的两项核心导航
+#   ② 代码块总行数不得占全文一半以上 —— 入口不是命令手册，命令靠链接
+#   ③ 单行不超过 400 字符 —— 长段落意味着在写解释而非导航
+# 行数仍作为提示上界（180 行）而非硬失败，避免把注意力全压在数字上。
 # ---------------------------------------------------------------------------
-LINES=$(wc -l < AGENTS.md | tr -d ' ')
-if [ "$LINES" -le 120 ]; then
-  pass "S1 AGENTS.md = ${LINES} 行 (≤120)"
-else
-  fail "S1 AGENTS.md = ${LINES} 行 (>120)" \
-       "把细节迁到 docs/ 对应模块，入口只留一行摘要 + 链接"
+S1_BROKEN=0
+
+for SEC in "仓库地图" "知识库六模块"; do
+  grep -q "^## .*${SEC}" AGENTS.md 2>/dev/null || {
+    fail "S1 缺少入口必备小节：${SEC}" "入口必须包含该节（只放一行摘要 + 链接）"
+    S1_BROKEN=1
+  }
+done
+
+TOTAL_LINES=$(wc -l < AGENTS.md | tr -d ' ')
+FENCE=$(grep -c '^```' AGENTS.md 2>/dev/null || echo 0)
+BLOCK_LINES=$(awk '/^```/{f=!f; next} f{n++} END{print n+0}' AGENTS.md)
+if [ "$TOTAL_LINES" -gt 0 ]; then
+  PCT=$((BLOCK_LINES * 100 / TOTAL_LINES))
+  if [ "$PCT" -ge 50 ]; then
+    fail "S1 代码块占比 ${PCT}% (≥50%)" \
+         "入口是导航不是手册——命令只留一行、细节链接到 docs/"
+    S1_BROKEN=1
+  fi
+fi
+
+LONG_LINES=$(awk 'length($0) > 400 {c++} END{print c+0}' AGENTS.md)
+if [ "$LONG_LINES" -gt 0 ]; then
+  fail "S1 有 ${LONG_LINES} 行超过 400 字符" "长段落说明在写解释而非导航，迁到 docs/"
+  S1_BROKEN=1
+fi
+
+if [ "$S1_BROKEN" -eq 0 ]; then
+  pass "S1 入口结构合规（导航两节齐全 / 代码块 ${PCT:-0}% / 无超长行 / ${TOTAL_LINES} 行）"
+  [ "$TOTAL_LINES" -gt 180 ] && \
+    warn "S1 AGENTS.md 已 ${TOTAL_LINES} 行 (>180 提示线)" "考虑把细节下沉，但不强制"
 fi
 
 # ---------------------------------------------------------------------------
@@ -251,6 +284,22 @@ if [ -z "$LEAK" ]; then
   pass "S7 现状文档无会话指代词"
 else
   fail "S7 现状文档出现会话指代（未来读者无法解析）" "改为指代具体文件/章节：$LEAK"
+fi
+
+# ---------------------------------------------------------------------------
+# S8 锚点登记册可自动生成：登记册是产出物，不是维护对象
+#    锚点是唯一事实来源（代码里的 //! 注释），登记表由 collar-anchors.sh 生成。
+#    这里只校验锚点字段合法（name/risk/owner 齐全），不比对文件内容——
+#    内容一致性由 `collar-anchors.sh` 重跑保证，人不需要手同步表格。
+# ---------------------------------------------------------------------------
+if [ -x scripts/collar-anchors.sh ] || [ -f scripts/collar-anchors.sh ]; then
+  if ANCHOR_OUT=$(sh scripts/collar-anchors.sh --check 2>&1); then
+    pass "S8 锚点登记可自动生成（$(printf '%s' "$ANCHOR_OUT" | sed 's/^ok   anchor: //')）"
+  else
+    fail "S8 锚点登记不合法" "$ANCHOR_OUT"
+  fi
+else
+  pass "S8 未启用锚点生成器（可选能力）"
 fi
 
 echo

@@ -13,6 +13,9 @@ cd "$ROOT" || exit 1
 
 sh scripts/collar-check.sh || exit 1
 
+# 边界执行体：deny_write 禁区检查（collar.yaml boundary 段的真实拦截）
+[ -f scripts/collar-boundary.sh ] && { sh scripts/collar-boundary.sh || exit 1; }
+
 CMDS=$(awk '
   /- name:/ {cmd=""}
   /cmd:/    {cmd=$0}

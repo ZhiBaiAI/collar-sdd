@@ -12,7 +12,7 @@ version: 1
 
 identity:
   role: "⟨本项目⟩ 的研发 Agent"
-  entry: AGENTS.md                 # 唯一入口，≤120 行
+  entry: AGENTS.md                 # 唯一入口，只做导航（结构判据见 collar-check S1）
   knowledge_base: docs/            # 六模块知识库
   # 每次会话必须先读的「最小上下文集」，按顺序加载
   must_read:
@@ -77,7 +77,7 @@ validation:
       kind: structure
       owner: collar-runbook
     - name: agents-map-guard       # 入口地图行数守卫（已含在 collar-check S1）
-      rule: "AGENTS.md ≤ 120 行，逼近 115 行触发迁出提醒"
+      rule: "AGENTS.md 只做导航：必有仓库地图与六模块两节、代码块占比 <50%、单行 ≤400 字符"
       owner: collar-runbook
     - name: spec-diff-report       # 代码 ↔ Spec 差异清单（语义级，Agent 执行）
       rule: "只输出差异交人决策，禁止自动反向修改 Spec"

@@ -16,7 +16,7 @@
 | [troubleshooting.md](troubleshooting.md) | **排障剧本** —— 现象 → 根因 → 解法 |
 | [testing.md](testing.md) | **测试知识总入口** —— 分层口径 / 运行时机 / 冒烟清单 / 测试坑 |
 | [context-stitching.md](context-stitching.md) | **上下文缝补协议** —— AI 时代最重要的工程纪律 |
-| [anchor-registry.md](anchor-registry.md) | **锚点登记册** —— 凡「逻辑离开代码」必须登记一条 |
+| [anchor-registry.md](anchor-registry.md) | **锚点登记册** —— 由脚本从 `//!` 注释自动生成，无需手填 |
 | [commit-gate.md](commit-gate.md) | **提交关卡** —— 一次提交触发三个 Skill |
 | [commit-checklist.md](commit-checklist.md) | **提交检查清单** —— 逐项勾选，结果附进 commit message |
 | [_template-stitching-skill.md](_template-stitching-skill.md) | **MCP 配套 Skill 模板** —— 何时查/怎么查/查到后用 |
@@ -48,7 +48,7 @@
 ## 本 Skill 的三条硬职责
 
 1. **沉淀** —— commit 后自动抽取约定与坑
-2. **守卫 AGENTS.md** —— >115 行立即把细节迁到 docs/，入口只留「摘要 + 链接」
+2. **守卫 AGENTS.md** —— 结构由 `collar-check` S1 校验（导航两节 / 代码块占比 / 超长行），入口只留「摘要 + 链接」
 3. **维护关键约定速查表** —— AGENTS.md 里那张「约定 / 一句话 / 详见」三列表
 
 新增约定进速查表的门槛（防止表膨胀）：
