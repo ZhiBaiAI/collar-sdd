@@ -62,6 +62,7 @@
 | 周期记账 | 执行时间与接手等待分开记；静默只作排查入口，先还原上次交接 | [conventions.md](docs/runbook/conventions.md) |
 | 提效核算 | 只认端到端时间、返工成本、上线缺陷三项；不认生成速度 | [conventions.md](docs/runbook/conventions.md) |
 | 边界划分 | 确定性步骤下沉 CLI，AI 只留推理点；AI 填的字段须独立检测 | [conventions.md](docs/runbook/conventions.md) |
+| 完成证据 | 接口返回成功不算完成；按证据强度分层，完成粒度（跑完/MR/合入/验收）分开统计 | [conventions.md](docs/runbook/conventions.md) |
 
 完整表见 [关键约定](docs/runbook/conventions.md)。
 
