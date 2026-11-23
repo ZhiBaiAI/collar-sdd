@@ -1,9 +1,9 @@
 #!/usr/bin/env sh
-# collar commit-msg — 规范 commit message 首行，便于 collar-changelog 提取
+# collar commit-msg — 规范 commit message 首行，让 git log 直接成为变更时间线
 #
-# 要求：`<类型>(<范围>): <一句话说明>`
-# 豁免：WIP/wip 开头不检查（WIP 是关卡允许的绕过场景之一）
-# 提醒：message 末尾未附 commit-checklist 勾选结果时打印 hint（不拦截）
+# 要求：`<类型>(<范围>): <一句话说明>`（或 `<类型>: <一句话说明>`）
+# 豁免：WIP/wip 开头不检查
+# 说明：不再强制在 message 末尾贴 checklist 打卡，避免 Minor 提交仪式化
 
 set -u
 MSG="${1:-}"
@@ -13,12 +13,9 @@ HEADLINE=$(head -1 "$MSG")
 case "$HEADLINE" in WIP*|wip*) exit 0 ;; esac
 
 printf '%s' "$HEADLINE" | grep -qE '^(feat|feature|fix|patch|sunset|docs|chore|refactor|test|ci|build|perf|style|revert)(\([^)]*\))?!?: .{2,}' || {
-  echo "FAIL commit message 首行需为「<类型>(<范围>): <一句话说明》"
+  echo "FAIL commit message 首行需为「<类型>(<范围>): <一句话说明>」"
   echo "     类型：feat feature fix patch sunset docs chore refactor test ci build perf style revert"
-  echo "     WIP 提交以 WIP 开头可豁免；确需绕过用 --no-verify（月度回顾会列出）"
+  echo "     破坏性变更在冒号前加 !（如 feat(api)!: ...）；WIP 开头豁免"
   exit 1
 }
-
-grep -q 'commit-checklist:' "$MSG" || \
-  echo "hint: message 末尾建议附 commit-checklist 勾选结果（见 docs/runbook/commit-checklist.md）"
 exit 0

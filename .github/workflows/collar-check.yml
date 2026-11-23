@@ -1,6 +1,6 @@
 name: collar-check
 
-# 结构门禁 CI：与本地 git hooks（scripts/hooks/pre-commit）同一执行体。
+# 结构与边界门禁 CI：与本地 git hooks（scripts/hooks/pre-commit）同一执行体。
 # hooks 是本地拦截，这里是仓库级兜底——未装配 hooks 的提交也跑不掉。
 
 on:
@@ -13,5 +13,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: 结构门禁（S0–S7）
+        with:
+          fetch-depth: 0
+      - name: 结构门禁（S0–S8）
         run: sh scripts/collar-check.sh
+      - name: 写边界门禁（校验本次变更文件）
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            sh scripts/collar-boundary.sh --range "${{ github.event.pull_request.base.sha }}...${{ github.sha }}"
+          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ] && git rev-parse --verify "${{ github.event.before }}" >/dev/null 2>&1; then
+            sh scripts/collar-boundary.sh --range "${{ github.event.before }}..${{ github.sha }}"
+          elif git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+            sh scripts/collar-boundary.sh --range "HEAD~1..HEAD"
+          else
+            sh scripts/collar-boundary.sh
+          fi

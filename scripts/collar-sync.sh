@@ -115,5 +115,5 @@ if [ -f scripts/collar-check.sh ]; then
 fi
 
 echo
-echo "Next: ① 审上面的 ②类 diff 挑需要的内容抄进本地 ② 记 changelog 条目 ③ git commit"
+echo "Next: ① 审上面的 ②类 diff 挑需要的内容合入本地 ② 跑 sh scripts/collar-check.sh && sh scripts/collar-boundary.sh ③ git commit"
 echo "      （本次覆盖的文件已在暂存区——review 后一次提交即可）"

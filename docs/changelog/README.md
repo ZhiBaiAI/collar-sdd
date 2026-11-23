@@ -1,58 +1,20 @@
-# docs/changelog/ — 变更时间线
+# docs/changelog/ — 变更时间线（按需模块）
 
-**回答：这个项目什么时候、变成了什么样。**
+**回答：这个项目在关键节点变成了什么样。**
 
-由 `collar-changelog` Skill 在 **git commit 时强制自动写入**，人不需主动维护。
+> **轻量化原则**：日常提交只需遵守 `commit-msg` 的 Conventional Commits 格式（`<类型>(<范围>): <说明>`），
+> **不再要求每次 commit 手写月度 Markdown 文件**。需要阶段回顾或发版说明时，运行脚本从 `git log` 一键提取：
+>
+> ```bash
+> sh scripts/collar-changelog.sh                    # 最近 30 条分组摘要
+> sh scripts/collar-changelog.sh --since 2026-11-01 # 指定起始日期
+> sh scripts/collar-changelog.sh v1.0.0..HEAD       # 指定版本区间
+> ```
 
 ---
 
-## 目录约定
+## 何时显式落盘
 
-```
-docs/changelog/
-├── README.md          # 本文件
-└── YYYY/
-    └── YYYY-MM.md     # 按月聚合，跨月自动开新文件
-```
-
-## 单条格式
-
-```markdown
-### YYYY-MM-DD · ⟨标签⟩ · ⟨一句话概述⟩ · ⟨@作者⟩
-
-- **Spec**：⟨站点地图坐标链接⟩ ｜ **影响面**：⟨模块 / 接口 / 数据⟩
-- **变更**：⟨做了什么 —— 写结果，不写过程⟩
-- **破坏性**：⟨有 / 无；有则写清迁移方式⟩
-- **关联**：⟨PR / Issue / ADR⟩
-```
-
-## 标签
-
-| 标签 | 含义 |
-|---|---|
-| `feature` | 新功能或稳定功能的正式迭代 |
-| `patch` | 补丁式小改动 |
-| `sunset` | 功能下线 / 迁移 |
-| `refactor` | 结构重组，行为不变 |
-| `fix` | 缺陷修复 |
-| `chore` | 依赖、配置、文档等杂项 |
-| `BREAKING` | 破坏性变更（**必须加粗置顶**） |
-
-## 质量红线
-
-- ❌ 「优化了一些代码」这类无信息量描述 —— **写结果，不写过程**
-- ❌ 遗漏作者 —— 多人协同时「谁改的」是第一线索
-- ❌ 同一件事记两遍 —— 一次提交 = 一条记录
-- ✅ 破坏性变更必须显眼 + 附迁移方式
-- ✅ 每条尽量反查到 spec 坐标，让时间线与站点地图互相索引
-
-## 月度回顾
-
-主动触发 `collar-changelog` 时按月聚合输出：
-各业务域改动分布、破坏性变更清单、sunset 清单、Spec 偏离高发区。
-趋势反哺 `collar-architecture`（是否该重构）与 `collar-runbook`（是否该立约定）。
-
-回顾额外回答两个知识库卫生问题（只进也要有出）：
-1. **约定退役**：哪些约定连续两个月没有命中过（没人踩也没人依赖）→ 降级为普通条目或合并
-2. **ADR 归档**：哪些 ADR 的理由已失效（被 supersede / 已成常识）→ 标注 deprecated 或归档
-   （归档标准看「未来决策价值」，见 [architecture/README.md](../architecture/README.md)）
+- **发版里程碑**：把 `collar-changelog.sh` 生成的摘要整理进 `docs/changelog/YYYY/YYYY-MM.md` 或根目录 `CHANGELOG.md`。
+- **`BREAKING` 破坏性变更**：在 commit message 加 `!`（如 `feat(api)!: ...`），并在变更记录里置顶写明迁移方式。
+- **阶段回顾**：顺带做一次知识库卫生检查——合并/退役长期未命中的约定（保持 `conventions.md` ≤15 条）、归档已失效的 ADR。

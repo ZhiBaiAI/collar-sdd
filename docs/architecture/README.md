@@ -51,6 +51,7 @@ docs/architecture/
 |---|---|---|
 | [0000](ADR/0000-adr-template.md) | 模板（示例） | accepted |
 | [0001](ADR/0001-冲突检测介入时机.md) | 冲突检测放在预发集成态，不在编码态做监控 | accepted |
+| [0002](ADR/0002-执行可外包积累不可外包.md) | 执行可以外包，积累不能外包 | accepted |
 
 状态机：`proposed` → `accepted` → `deprecated` / `superseded by NNNN`；
 提出后被否决的决策记为 `rejected`（保留否决理由，防止未来把同一方案当新方案重提）。

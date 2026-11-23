@@ -1,31 +1,76 @@
 #!/usr/bin/env sh
-# collar-check.sh — 结构门禁（语言无关，只依赖 POSIX sh + grep/find/wc）
+# collar-check.sh — 结构门禁（语言无关，只依赖 POSIX sh + grep/find/sed/awk/wc）
 #
-# 契约声明在 collar.yaml 的 validation.gates；本脚本是其中一个执行体。
-# 与 lint / typecheck / test 这类语言相关门禁不同，本脚本检查的是
-# 知识库自身的结构完整性，复制模板即生效，无需按技术栈装配。
+# 契约声明在 collar.yaml 的 validation.gates；本脚本是结构门禁的执行体，
+# 检查知识库与规范的机械不变量，复制模板即生效。
 #
-# 用法：sh scripts/collar-check.sh   （在仓库根执行；CI 与 pre-commit 均可挂）
-# 退出码：0 = 全部通过；1 = 有失败项（逐条列出）
+# 用法：
+#   sh scripts/collar-check.sh          # 人类可读输出
+#   sh scripts/collar-check.sh --json   # 机器可读 JSON 输出
+#
+# 退出码：0 = 全部通过；1 = 有失败项；2 = 参数错误
 
 set -u
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-cd "$ROOT"
+cd "$ROOT" || exit 1
+
+JSON=0
+for ARG in "$@"; do
+  case "$ARG" in
+    --json) JSON=1 ;;
+    *)
+      printf 'ERR  未知参数：%s（可选 --json）\n' "$ARG" >&2
+      exit 2
+      ;;
+  esac
+done
 
 FAIL=0
-note() { printf '  %s\n' "$1"; }
-fail() { FAIL=1; printf 'FAIL %s\n' "$1"; note "修法：$2"; }
-pass() { printf 'ok   %s\n' "$1"; }
-warn() { printf 'warn %s\n' "$1"; note "提示：$2"; }
+CHECKS_JSON=""
+FIRST_C=1
 
-echo "collar-check — 结构门禁"
-echo "repo: $ROOT"
-echo
+json_esc() {
+  printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g' | tr '\n' ' '
+}
+
+record_json() {
+  STATUS="$1"; ITEM="$2"; DETAIL="$3"
+  [ "$FIRST_C" -eq 1 ] || CHECKS_JSON="${CHECKS_JSON},"
+  FIRST_C=0
+  CHECKS_JSON="${CHECKS_JSON}{\"status\":\"$(json_esc "$STATUS")\",\"item\":\"$(json_esc "$ITEM")\",\"detail\":\"$(json_esc "$DETAIL")\"}"
+}
+
+note() { [ "$JSON" -eq 1 ] || printf '  %s\n' "$1"; }
+fail() {
+  FAIL=1
+  record_json "fail" "$1" "$2"
+  if [ "$JSON" -eq 0 ]; then
+    printf 'FAIL %s\n' "$1"
+    note "修法：$2"
+  fi
+}
+pass() {
+  record_json "ok" "$1" ""
+  [ "$JSON" -eq 1 ] || printf 'ok   %s\n' "$1"
+}
+warn() {
+  record_json "warn" "$1" "$2"
+  if [ "$JSON" -eq 0 ]; then
+    printf 'warn %s\n' "$1"
+    note "提示：$2"
+  fi
+}
+
+if [ "$JSON" -eq 0 ]; then
+  echo "collar-check — 结构门禁"
+  echo "repo: $ROOT"
+  echo
+fi
 
 # ---------------------------------------------------------------------------
-# S0 核心结构存在性：骨架文件缺失时其余检查全部失去意义，先拦
-#    （grep 2>/dev/null 会静默吞掉「文件不存在」，缺骨架必须显式失败）
+# S0 核心结构存在性：骨架文件缺失时其余检查失去意义，先拦
+#    changelog / vendor / wiki 属按需目录，不强制空项目建空壳
 # ---------------------------------------------------------------------------
 S0_BROKEN=0
 for REQUIRED in AGENTS.md collar.yaml VERSION docs/README.md docs/specs/README.md \
@@ -36,27 +81,24 @@ for REQUIRED in AGENTS.md collar.yaml VERSION docs/README.md docs/specs/README.m
     fail "S0 核心文件缺失" "${REQUIRED} 不存在——恢复该文件（模板原样或从 git 历史找回）"
   fi
 done
-for REQUIRED_DIR in docs/specs docs/runbook docs/architecture docs/changelog; do
+for REQUIRED_DIR in docs/specs docs/runbook docs/architecture; do
   if [ ! -d "$REQUIRED_DIR" ]; then
     S0_BROKEN=1
-    fail "S0 核心目录缺失" "${REQUIRED_DIR}/ 不存在——恢复该目录（六模块结构缺一不可）"
+    fail "S0 核心目录缺失" "${REQUIRED_DIR}/ 不存在——恢复该目录"
   fi
 done
 [ "$S0_BROKEN" -eq 0 ] && pass "S0 模板骨架完整（核心文件与目录齐全）"
 
 # ---------------------------------------------------------------------------
 # S1 入口地图结构：AGENTS.md 只做导航，不做解释
-#
-# 判据从「绝对行数」改为「内容类型」——行数是行数的代理指标，会反向塑造内容
-# （为了不超行数把该放入口的东西挪走）。这里查真正决定入口可否被扫读的三件事：
-#   ① 必有「仓库地图」与「知识库六模块」两节 —— 入口的两项核心导航
-#   ② 代码块总行数不得占全文一半以上 —— 入口不是命令手册，命令靠链接
-#   ③ 单行不超过 400 字符 —— 长段落意味着在写解释而非导航
-# 行数仍作为提示上界（180 行）而非硬失败，避免把注意力全压在数字上。
+#    ① 必有「仓库地图」与「知识库」两节
+#    ② 代码块总行数不得占全文一半以上
+#    ③ 单行不超过 400 字符
+#    行数 >150 仅提示告警，不硬失败
 # ---------------------------------------------------------------------------
 S1_BROKEN=0
 
-for SEC in "仓库地图" "知识库六模块"; do
+for SEC in "仓库地图" "知识库"; do
   grep -q "^## .*${SEC}" AGENTS.md 2>/dev/null || {
     fail "S1 缺少入口必备小节：${SEC}" "入口必须包含该节（只放一行摘要 + 链接）"
     S1_BROKEN=1
@@ -64,7 +106,6 @@ for SEC in "仓库地图" "知识库六模块"; do
 done
 
 TOTAL_LINES=$(wc -l < AGENTS.md | tr -d ' ')
-FENCE=$(grep -c '^```' AGENTS.md 2>/dev/null || echo 0)
 BLOCK_LINES=$(awk '/^```/{f=!f; next} f{n++} END{print n+0}' AGENTS.md)
 if [ "$TOTAL_LINES" -gt 0 ]; then
   PCT=$((BLOCK_LINES * 100 / TOTAL_LINES))
@@ -83,47 +124,52 @@ fi
 
 if [ "$S1_BROKEN" -eq 0 ]; then
   pass "S1 入口结构合规（导航两节齐全 / 代码块 ${PCT:-0}% / 无超长行 / ${TOTAL_LINES} 行）"
-  [ "$TOTAL_LINES" -gt 180 ] && \
-    warn "S1 AGENTS.md 已 ${TOTAL_LINES} 行 (>180 提示线)" "考虑把细节下沉，但不强制"
+  [ "$TOTAL_LINES" -gt 150 ] && \
+    warn "S1 AGENTS.md 已 ${TOTAL_LINES} 行 (>150 提示线)" "考虑把细节下沉到 docs/，保持入口可一屏扫读"
 fi
 
 # ---------------------------------------------------------------------------
-# S2 spec.md 必须有伴生 tests.md（只查业务域，跳过 _templates/_archived）
+# S2 spec 验收标准编号：非草稿 spec.md 必须至少声明一条 AC-N
+#    tests.md 改为可选伴生文档（不再强制一功能两文档，简单功能在 spec 内联验证映射即可）
 # ---------------------------------------------------------------------------
-MISSING_T=""
-# find 输出含空格路径会被 for 按空白分词 → 用 heredoc 逐行读入
+S2_BROKEN=0
 while IFS= read -r SPEC; do
   [ -n "${SPEC}" ] || continue
-  DIR=$(dirname "${SPEC}")
-  [ -f "${DIR}/tests.md" ] || MISSING_T="${MISSING_T} ${SPEC}"
+  # 草稿态允许尚未写全 AC
+  if grep -qE '^\| *状态 *\| *草稿' "${SPEC}" 2>/dev/null; then
+    continue
+  fi
+  if ! grep -qE '`AC-(P[0-9]+-)?[0-9]+`' "${SPEC}" 2>/dev/null; then
+    S2_BROKEN=1
+    fail "S2 ${SPEC}" "非草稿 spec 缺少编号验收标准 \`AC-N\`——至少声明一条可判定验收标准（或把状态标为草稿）"
+  fi
 done <<FINDLIST
 $(find docs/specs -name spec.md -not -path '*/_templates/*' -not -path '*/_archived/*')
 FINDLIST
-if [ -z "$MISSING_T" ]; then
-  pass "S2 每个 spec.md 都有同目录 tests.md"
-else
-  fail "S2 以下 spec.md 缺伴生 tests.md" "每个功能点必须有测试文档（复制 docs/specs/_templates/tests.md）:${MISSING_T}"
-fi
+[ "$S2_BROKEN" -eq 0 ] && pass "S2 所有非草稿 spec.md 均声明编号验收标准 AC-N（tests.md 按需可选）"
 
 # ---------------------------------------------------------------------------
-# S3 AC 双向对齐：spec 的 AC-N 与 tests.md 的回指互相覆盖
-#    spec 声明而 tests 未回指 → 缺口；tests 回指而 spec 未声明 → 悬空引用
+# S3 AC 双向对齐：当功能点目录存在 tests.md 时，spec 的 AC-N 与 tests/patch 必须互相对齐
 # ---------------------------------------------------------------------------
 S3_BROKEN=0
+S3_CHECKED=0
 while IFS= read -r PAIR_DIR; do
   [ -n "${PAIR_DIR}" ] || continue
-  SPEC_AC=$(grep -o 'AC-[0-9][0-9]*' "${PAIR_DIR}/spec.md" 2>/dev/null | sort -u | tr '\n' ',')
+  [ -f "${PAIR_DIR}/tests.md" ] || continue
+  S3_CHECKED=$((S3_CHECKED + 1))
+  SPEC_AC=$(grep -o 'AC-[0-9][0-9]*' "${PAIR_DIR}/spec.md" 2>/dev/null | sort -u | tr '\n' ' ')
   TESTS_AC=$(grep -oh 'AC-[0-9][0-9]*' "${PAIR_DIR}/tests.md" "${PAIR_DIR}"/PATCH-*.md 2>/dev/null | sort -u | tr '\n' ',')
-  # patch 引入的 AC-PNNN-N 细化主文档 AC-N，属合法覆盖，这里只对齐 AC-N 本身
-  # 注：字符串内变量一律 ${...} 包裹——部分 sh 会把紧跟变量的全角标点首字节并进变量名
+  SPEC_AC_CSV=$(printf '%s' "${SPEC_AC}" | tr ' ' ',')
   for AC in ${SPEC_AC}; do
     case ",${TESTS_AC}," in
       *",${AC},"*) ;;
-      *) S3_BROKEN=1; fail "S3 ${PAIR_DIR}" "spec 声明了 ${AC}，但 tests.md（含 patch）没有任何测试点回指它 → 登记缺口或补测试点" ;;
+      *) S3_BROKEN=1; fail "S3 ${PAIR_DIR}" "spec 声明了 ${AC}，但 tests.md（含 patch）没有测试点回指它 → 补测试点或登记缺口" ;;
     esac
   done
-  for AC in ${TESTS_AC}; do
-    case ",${SPEC_AC}," in
+  TESTS_AC_SP=$(printf '%s' "${TESTS_AC}" | tr ',' ' ')
+  for AC in ${TESTS_AC_SP}; do
+    [ -n "${AC}" ] || continue
+    case ",${SPEC_AC_CSV}," in
       *",${AC},"*) ;;
       *) S3_BROKEN=1; fail "S3 ${PAIR_DIR}" "tests.md/patch 引用了 ${AC}，但 spec.md 没有这条编号 → 补 AC 或修正编号" ;;
     esac
@@ -131,54 +177,69 @@ while IFS= read -r PAIR_DIR; do
 done <<FINDLIST
 $(find docs/specs -name spec.md -not -path '*/_templates/*' -not -path '*/_archived/*' -exec dirname {} \;)
 FINDLIST
-[ "$S3_BROKEN" -eq 0 ] && pass "S3 AC-N 双向对齐（spec ↔ tests/patch）"
-
-# ---------------------------------------------------------------------------
-# S4 ADR 编号唯一：docs/architecture/ADR/NNNN-*.md 前缀不得重复
-# ---------------------------------------------------------------------------
-DUP=$(ls docs/architecture/ADR 2>/dev/null | grep -o '^[0-9]\{4\}' | sort | uniq -d)
-if [ -z "$DUP" ]; then
-  pass "S4 ADR 编号唯一"
-else
-  fail "S4 ADR 编号重复" "重复前缀：$DUP —— 决策只增不改，新决策用下一个编号"
+if [ "$S3_BROKEN" -eq 0 ]; then
+  if [ "$S3_CHECKED" -gt 0 ]; then
+    pass "S3 AC-N 双向对齐（已校验 ${S3_CHECKED} 个含 tests.md 的功能点）"
+  else
+    pass "S3 AC-N 双向对齐（无伴生 tests.md，采用 spec 内联验证模式）"
+  fi
 fi
 
 # ---------------------------------------------------------------------------
-# S5 patch 双向指针 + Delta 一致性：patch 有「覆盖范围」节、主文档有取代标记；
-#    §⑥ delta 校验引用存在性、RENAMED 配对/新号、跨小节冲突、段外孤儿行、标题拼错
+# S4 ADR 编号唯一 + ADR 索引不漏登
+# ---------------------------------------------------------------------------
+S4_BROKEN=0
+DUP=$(ls docs/architecture/ADR 2>/dev/null | grep -o '^[0-9]\{4\}' | sort | uniq -d)
+if [ -n "$DUP" ]; then
+  S4_BROKEN=1
+  fail "S4 ADR 编号重复" "重复前缀：$DUP —— 决策只增不改，新决策用下一个编号"
+fi
+if [ -d docs/architecture/ADR ] && [ -f docs/architecture/README.md ]; then
+  while IFS= read -r ADRF; do
+    [ -n "$ADRF" ] || continue
+    BASE=$(basename "$ADRF")
+    case "$BASE" in 0000-*) continue ;; esac
+    if ! grep -q "$BASE" docs/architecture/README.md 2>/dev/null; then
+      S4_BROKEN=1
+      fail "S4 ADR 漏登索引" "${ADRF} 未在 docs/architecture/README.md 的 ADR 索引中登记"
+    fi
+  done <<ADRLIST
+$(find docs/architecture/ADR -maxdepth 1 -name '[0-9][0-9][0-9][0-9]-*.md' 2>/dev/null | sort)
+ADRLIST
+fi
+[ "$S4_BROKEN" -eq 0 ] && pass "S4 ADR 编号唯一且索引齐全"
+
+# ---------------------------------------------------------------------------
+# S5 patch 双向指针 + Delta 一致性
 # ---------------------------------------------------------------------------
 S5_BROKEN=0
-# find 输出含空格路径会被 for 按空白分词 → 用 heredoc 逐行读入；
-# 不用管道（while 在子 shell 里跑，FAIL 标志无法传播）
 while IFS= read -r PATCH; do
   [ -n "${PATCH}" ] || continue
+  # 已收敛 / 已废弃的 patch 仅作历史保留（不再是并存态），跳过在途双向指针与 Delta 校验
+  PATCH_ST=$(sed -n 's/^| *状态 *| *\([^|]*\)|.*/\1/p' "${PATCH}" 2>/dev/null | head -1 | sed 's/^ *//; s/ *$//')
+  case "${PATCH_ST}" in
+    *⟨*) ;;
+    *已收敛*|*已废弃*) continue ;;
+  esac
   DIR=$(dirname "${PATCH}")
-  BASE=$(basename "${PATCH}" .md)   # PATCH-001-分页策略
+  BASE=$(basename "${PATCH}" .md)
   NUM=$(printf '%s' "${BASE}" | sed 's/^PATCH-\([0-9]\{3\}\)-.*/\1/')
-  # 文件名必须符合 PATCH-NNN-简述：编号提取失败（NUM 未变化）说明命名违规，
-  # 此时反向指针检查失去依据，报格式错误并跳过本文件的指针检查
   if [ "${NUM}" = "${BASE}" ] || ! printf '%s' "${NUM}" | grep -q '^[0-9]\{3\}$'; then
     S5_BROKEN=1
     fail "S5 ${PATCH}" "patch 文件名不符合 PATCH-NNN-简述 约定（NNN 为三位数字）——改名为 PATCH-NNN-简述.md 后重查"
     continue
   fi
   grep -q '覆盖范围' "${PATCH}" || { S5_BROKEN=1; fail "S5 ${PATCH}" "缺少「① 覆盖范围」节——按 _templates/patch.md 补上 Patch → 主文档指针"; }
-  # 主文档侧：spec.md 应出现 PATCH-<NUM> 的取代标记
   if ! grep -q "已被.*PATCH-${NUM}" "$DIR/spec.md" 2>/dev/null; then
     S5_BROKEN=1
     fail "S5 ${DIR}/spec.md" "存在 ${BASE} 但主文档没有「已被 …PATCH-${NUM}…取代」反向指针——在主文档目标章节加取代标记（见 patch 模板 §⑤）"
   fi
-  # Delta 一致性（一次 awk 全查，输出 KIND\t数据 由下方循环分发）：
-  #   CHK  需存在于主文档的编号（MODIFIED / REMOVED / RENAMED FROM）
-  #   NEW  不得存在于主文档的编号（RENAMED TO）
-  #   ERR  结构错误：小节内重复 / 跨小节同编号 / FROM-TO 不配对 /
-  #        段外 AC 孤儿行 / 疑似拼错的小节标题
   while IFS="$(printf '\t')" read -r KIND REST; do
     [ -n "${KIND}" ] || continue
     case "${KIND}" in
       CHK) grep -q "\`${REST}\`" "${DIR}/spec.md" 2>/dev/null || {
              S5_BROKEN=1
-             fail "S5 ${PATCH}" "delta 引用的 ${REST} 在主文档 §5 不存在——核对编号（可能打错、已被移除或被 RENAMED 改名）"
+             fail "S5 ${PATCH}" "delta 引用的 ${REST} 在主文档不存在——核对编号（可能打错、已被移除或被 RENAMED 改名）"
            } ;;
       NEW) grep -q "\`${REST}\`" "${DIR}/spec.md" 2>/dev/null && {
              S5_BROKEN=1
@@ -211,7 +272,7 @@ $(awk '
     id=$0; sub(/^[^`]*`/,"",id); sub(/`.*/,"",id)
     if (pend=="") printf "ERR\t### RENAMED 里 TO: `%s` 没有配对的 FROM:\n", id
     else pend=""
-    if (id !~ /^AC-P[0-9]+-[0-9]+$/) printf "ERR\tRENAMED TO 的 `%s` 必须是 AC-PNNN-N 形编号——普通 AC-N 会撞主文档编号体系并触发 S3 悬空引用\n", id
+    if (id !~ /^AC-P[0-9]+-[0-9]+$/) printf "ERR\tRENAMED TO 的 `%s` 必须是 AC-PNNN-N 形编号——普通 AC-N 会撞主文档编号体系\n", id
     mark(id,"RENAMED(TO)"); printf "NEW\t%s\n", id; next
   }
   sec!="" && sec!="RENAMED" && match($0,/^-[ ]*(\[[ xX]\][ ]*)?`AC-[A-Za-z0-9-]+`/) {
@@ -244,41 +305,23 @@ FINDLIST
 [ "$S5_BROKEN" -eq 0 ] && pass "S5 patch 双向指针 + Delta 一致性"
 
 # ---------------------------------------------------------------------------
-# S6 changelog 联动：改了 docs/specs/**（业务域）则同一次提交必须也改 changelog
-#    「存在旧条目」不算通过——要求 changelog 也在本次暂存区里，
-#    否则模板自带的示范条目会让检查恒真（门禁等于没装）。
-#    仅在有 git 且非空提交的场景检查；cold-start 前自动跳过
+# S6 知识库卫生：约定防膨胀（>15 条告警）；日常提交不再强制手写月度 changelog
+#    （changelog 改由 git log + scripts/collar-changelog.sh 按需生成）
 # ---------------------------------------------------------------------------
-if git rev-parse --verify HEAD >/dev/null 2>&1; then
-  MONTH=$(date +%Y-%m)
-  MONTHFILE="docs/changelog/$(date +%Y)/${MONTH}.md"
-  # core.quotePath=false：否则 git 把非 ASCII 路径转义成 "\345\237\237"，
-  # 模板目录名默认含中文，前缀匹配会全部失效（门禁静默恒真）
-  STAGED=$(git -c core.quotePath=false diff --cached --name-only 2>/dev/null)
-  SPEC_CHANGED=$(printf '%s\n' "$STAGED" | grep '^docs/specs/.*/[0-9][0-9]_' || true)
-  if [ -n "$SPEC_CHANGED" ]; then
-    if printf '%s\n' "$STAGED" | grep -q '^docs/changelog/.*\.md$'; then
-      pass "S6 变更了 specs，changelog 已同次提交"
-    else
-      fail "S6 变更了 specs 但 changelog 未同次提交" \
-           "在 ${MONTHFILE} 记一条并 git add（一次提交 = 一条记录，collar-changelog 负责）"
-    fi
-  else
-    pass "S6 未变更 specs（changelog 检查跳过）"
-  fi
+CONV_COUNT=$(grep -c '^### C-' docs/runbook/conventions.md 2>/dev/null || echo 0)
+if [ "$CONV_COUNT" -gt 15 ]; then
+  warn "S6 conventions.md 已有 ${CONV_COUNT} 条约定 (>15 提示线)" \
+       "约定过多会稀释常驻上下文——合并同类项或退役长期未命中的约定"
 else
-  note "S6 无 git 历史（cold-start），跳过 changelog 联动检查"
+  pass "S6 知识库卫生合规（conventions ${CONV_COUNT} 条 ≤15；changelog 按需从 git log 生成）"
 fi
 
 # ---------------------------------------------------------------------------
 # S7 现状文档只写现在时：禁用绑定「过去某次会话」的指代词
-#    （本次新增 / 本轮对话 / 刚才 / 上文提到——未来读者无法解析）
-#    「本次提交」是执行时指代，提交时谁读就指谁的提交，不算泄漏，不查。
-#    历史叙述只属于 changelog / ADR / sunset / _archived / blue-print（不检查）
 # ---------------------------------------------------------------------------
 LEAK=$(grep -rn '本次新增\|本轮\|刚才\|上文提到\|上次提到\|本次调整\|本次引入' \
        AGENTS.md collar.yaml README.md README.en.md skills/ docs/specs/README.md \
-       docs/architecture/README.md docs/runbook/*.md docs/changelog/README.md \
+       docs/architecture/README.md docs/runbook/*.md \
        2>/dev/null || true)
 if [ -z "$LEAK" ]; then
   pass "S7 现状文档无会话指代词"
@@ -287,10 +330,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# S8 锚点登记册可自动生成：登记册是产出物，不是维护对象
-#    锚点是唯一事实来源（代码里的 //! 注释），登记表由 collar-anchors.sh 生成。
-#    这里只校验锚点字段合法（name/risk/owner 齐全），不比对文件内容——
-#    内容一致性由 `collar-anchors.sh` 重跑保证，人不需要手同步表格。
+# S8 锚点登记册可自动生成
 # ---------------------------------------------------------------------------
 if [ -x scripts/collar-anchors.sh ] || [ -f scripts/collar-anchors.sh ]; then
   if ANCHOR_OUT=$(sh scripts/collar-anchors.sh --check 2>&1); then
@@ -302,10 +342,20 @@ else
   pass "S8 未启用锚点生成器（可选能力）"
 fi
 
+if [ "$JSON" -eq 1 ]; then
+  if [ "$FAIL" -eq 0 ]; then
+    printf '{"ok":true,"repo":"%s","checks":[%s]}\n' "$(json_esc "$ROOT")" "$CHECKS_JSON"
+    exit 0
+  else
+    printf '{"ok":false,"repo":"%s","checks":[%s]}\n' "$(json_esc "$ROOT")" "$CHECKS_JSON"
+    exit 1
+  fi
+fi
+
 echo
 if [ "$FAIL" -eq 0 ]; then
   echo "全部通过 ✓"
-  echo "Next: 按 docs/runbook/commit-checklist.md 完成 ③–⑦（changelog / runbook / spec 差异 / 缝补）后提交"
+  echo "Next: 按改动分级（Minor / Standard / Major）完成对应验证后提交（见 docs/runbook/commit-gate.md）"
   exit 0
 else
   echo "存在失败项，提交被拦截 ✗"

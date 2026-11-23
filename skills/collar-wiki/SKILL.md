@@ -1,6 +1,6 @@
 ---
 name: collar-wiki
-description: 人工维护的自由知识库，承载「需要人保障质量」的内容：设计理念、竞品分析、领域调研，以及 blue-print 蓝图探索层。管理蓝图成熟度阶梯（[调研] → [讨论稿] → [技术方案]...V-MVP）与「毕业」流程——调研成熟后迁入 docs/specs 成为正式 feature。当用户说「先调研一下」「记个想法」「竞品是怎么做的」「这个方案还没定」「这个蓝图可以毕业了吗」时使用。
+description: 管理人工主导的自由知识库与 blue-print 蓝图孵化层（[调研] → [讨论稿] → [技术方案] → 毕业迁入 specs）。不适用于：已定型的正式功能规格（去 collar-specs）、已落地的架构决策（去 collar-architecture）或由 AI 自动沉淀的排障经验（去 collar-runbook）。当用户说「先调研一下」「记个想法」「竞品是怎么做的」「这个方案还没定」「这个蓝图可以毕业了吗」时使用。
 agent_created: true
 argument-hint: ⟨主题 / 蓝图名⟩
 ---

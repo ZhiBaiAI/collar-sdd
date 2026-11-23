@@ -1,6 +1,6 @@
 ---
 name: collar-vendor
-description: 管理外部参考代码资产。核心原则是「只做减法、只下载我们所需要的」，登记来源/版本/许可/提炼要点到 SOURCES.md，并在写技术方案时作为 collar-specs 的实证参考源——自动「读」用户丢进来但没细看的代码，提取模板、API 用法、架构模式并标注来源。当用户说「参考这个仓库」「这是官方 demo」「调研一下 XX 库」「vendor 里有没有现成实现」时使用。
+description: 管理外部参考代码资产（docs/vendor/），只做减法保留必需文件，登记来源/许可/提炼要点到 SOURCES.md 供技术方案参考。不适用于：正常安装运行时依赖（应走包管理器，不进 vendor）或纯文字竞品分析（去 collar-wiki）。当用户说「参考这个仓库」「这是官方 demo」「调研一下 XX 库」「vendor 里有没有现成实现」时使用。
 agent_created: true
 argument-hint: ⟨仓库 URL / 库名⟩
 ---

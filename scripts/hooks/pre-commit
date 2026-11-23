@@ -1,11 +1,12 @@
 #!/usr/bin/env sh
-# collar pre-commit — 提交关卡 ①②：结构门禁 + 质量门禁
+# collar pre-commit — 提交前技术门禁：结构门禁 + 写边界 + commit 档质量门禁
 #
-# ① collar-check.sh：知识库结构完整性，失败直接拦截
-# ② 质量门禁：读 collar.yaml validation.gates 中 kind: quality 的 cmd 逐个执行；
-#    命令还是 ⟨占位符⟩ 的跳过（落地后填入真实命令即自动生效，无需改本脚本）
+# ① collar-check.sh：知识库结构完整性
+# ② collar-boundary.sh：collar.yaml boundary.default / allow_write / deny_write 真实拦截
+# ③ 质量门禁：执行 collar.yaml validation.gates 中 kind: quality 且 stage 为 commit（或未标 stage）的 cmd；
+#    命令仍是 ⟨占位符⟩ 的自动跳过；stage: fast / release 不在 pre-commit 跑（避免拖慢提交）
 #
-# 允许绕过：仅 WIP 与纯 typo 提交可用 --no-verify，且须在 message 写明原因（月度回顾列出）
+# 允许绕过：仅 WIP 与纯 typo 提交可用 --no-verify
 
 set -u
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
@@ -13,19 +14,33 @@ cd "$ROOT" || exit 1
 
 sh scripts/collar-check.sh || exit 1
 
-# 边界执行体：deny_write 禁区检查（collar.yaml boundary 段的真实拦截）
 [ -f scripts/collar-boundary.sh ] && { sh scripts/collar-boundary.sh || exit 1; }
 
 CMDS=$(awk '
-  /- name:/ {cmd=""}
-  /cmd:/    {cmd=$0}
-  /kind:/   { if ($0 ~ /quality/ && cmd != "") print cmd; cmd="" }
-' collar.yaml 2>/dev/null | sed 's/.*cmd: *"\(.*\)".*/\1/; s/^ *//' | grep -v '⟨' || true)
+  function flush() {
+    if (kind == "quality" && cmd != "" && (stage == "" || stage == "commit")) {
+      print cmd
+    }
+    cmd=""; kind=""; stage=""
+  }
+  /^[[:space:]]*-[[:space:]]*name:/ { flush(); next }
+  /^[[:space:]]*cmd:/   {
+    line=$0; sub(/.*cmd:[[:space:]]*"/, "", line); sub(/".*$/, "", line); cmd=line; next
+  }
+  /^[[:space:]]*kind:/  {
+    line=$0; sub(/.*kind:[[:space:]]*/, "", line); sub(/[[:space:]]*#.*$/, "", line); gsub(/[[:space:]]/, "", line); kind=line; next
+  }
+  /^[[:space:]]*stage:/ {
+    line=$0; sub(/.*stage:[[:space:]]*/, "", line); sub(/[[:space:]]*#.*$/, "", line); gsub(/[[:space:]]/, "", line); stage=line; next
+  }
+  /^[^[:space:]]/ && !/^validation:/ { flush() }
+  END { flush() }
+' collar.yaml 2>/dev/null | grep -v '⟨' || true)
 
 [ -n "$CMDS" ] || exit 0
 
 echo
-echo "quality gates（collar.yaml kind: quality）"
+echo "quality gates（stage: commit）"
 while IFS= read -r CMD; do
   [ -n "$CMD" ] || continue
   echo "  run: $CMD"

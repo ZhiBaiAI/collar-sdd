@@ -25,10 +25,10 @@ case "${1:-install}" in
     chmod +x scripts/hooks/* 2>/dev/null || die "scripts/hooks/ 不存在或为空"
     git config core.hooksPath scripts/hooks
     echo "installed  core.hooksPath = scripts/hooks"
-    echo "  pre-commit  → collar-check + 质量门禁（collar.yaml kind:quality）"
+    echo "  pre-commit  → collar-check + collar-boundary + commit 档质量门禁"
     echo "  commit-msg  → 首行格式「<类型>(<范围>): <说明>」（WIP 豁免）"
-    echo "  post-commit → 知识沉淀 ③④ 提醒"
-    echo "  pre-push    → 结构门禁复跑 + ⑤⑥⑦ 协议项自查"
+    echo "  post-commit → 仅在 BREAKING 变更时提示写迁移说明"
+    echo "  pre-push    → 结构门禁复跑 + Standard/Major 语义自查提醒"
     echo
     echo "Next: 做一次提交验证钩子生效（应看到 collar-check 输出）"
     ;;

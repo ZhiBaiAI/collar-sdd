@@ -141,9 +141,9 @@ printf '%s\n' "$TSV" | awk -F'\t' '{print "  " $1 "  " $2}'
 echo
 echo "剩余手工项（脚本不代决策）："
 echo "  1. 把 patch §③ 的正文合入 spec.md 被取代章节，并移除「已被 ${BASE} 取代」标记块"
-echo "  2. tests.md：REMOVED 的 AC 对应测试点标作废（记录保留）；MODIFIED 的核对判定文本；RENAMED 的回指改新编号"
+echo "  2. 若同目录存在 tests.md：REMOVED 对应测试点标作废（记录保留）；MODIFIED 核对判定文本；RENAMED 回指改新编号"
 echo "  3. spec.md「变更历史」表本 patch 行补记收敛日期"
-echo "  4. docs/changelog/ 记一条收敛记录"
+echo "  4. 提交时在 commit message 注明已收敛（发版汇总再跑 collar-changelog.sh）"
 echo
 echo "Next: sh scripts/collar-check.sh 验证结构门禁"
 exit 0
